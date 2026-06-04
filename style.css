@@ -1,0 +1,113 @@
+/* Core Typography and Backgrounds */
+body {
+    font-family: 'Inter', 'Segoe UI', Tahoma, sans-serif;
+    color: #334155; 
+}
+
+.bg-app { background-color: #e2e8f0 !important; }
+.bg-navy { background-color: #0f172a !important; }
+.text-navy { color: #0f172a !important; }
+.border-navy { border-color: #0f172a !important; }
+.bg-primary-gradient { background: linear-gradient(135deg, #4f46e5, #3b82f6); }
+
+/* Buttons & Micro-interactions */
+.btn-navy {
+    background-color: #0f172a;
+    color: white;
+    border: none;
+    transition: all 0.2s ease-in-out;
+}
+.btn-navy:hover {
+    background-color: #1e293b; 
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.btn-outline-navy {
+    border: 2px solid #0f172a;
+    color: #0f172a;
+    background: transparent;
+    transition: all 0.2s ease-in-out;
+}
+.btn-outline-navy:hover {
+    background-color: #0f172a;
+    color: white;
+}
+
+/* Card Depth */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
+}
+.card.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Form Inputs */
+.input-transition { transition: box-shadow 0.2s ease, border 0.2s ease; }
+.input-transition:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+    outline: none;
+}
+.form-control, .form-select { background-color: #f8fafc !important; }
+
+/* Table Styling */
+.table th {
+    color: #64748b; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;
+}
+.table td { padding: 16px; vertical-align: middle; }
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(15, 23, 42, 0.75); 
+    z-index: 2000; backdrop-filter: blur(5px);
+}
+
+/* Animations & Gamification */
+.transition-width { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s; }
+
+#streakBadge {
+    animation: glow 2s infinite alternate;
+}
+
+@keyframes glow {
+    from { box-shadow: 0 0 5px rgba(220, 53, 69, 0.5); }
+    to { box-shadow: 0 0 15px rgba(220, 53, 69, 0.9); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -468px 0; }
+    100% { background-position: 468px 0; }
+}
+.skeleton-box {
+    background: #f6f7f8;
+    background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+    background-repeat: no-repeat;
+    background-size: 800px 100%; 
+    animation: shimmer 1.5s infinite linear forwards;
+}
+
+/* Zepto/GPay Success Banner */
+.custom-toast {
+    background-color: #1e4620;
+    border-left: 4px solid #34a853;
+    color: #e6f4ea;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    animation: slideInRight 0.3s ease-out forwards;
+    transition: all 0.3s ease;
+}
+.custom-toast.toast-info {
+    background-color: #0f172a;
+    border-left: 4px solid #3b82f6;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
