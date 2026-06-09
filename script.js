@@ -352,7 +352,7 @@ function updateDashboard(dataArray, isFiltered = false) {
 }
 
 // ==========================================
-// 11. HEURISTIC AI ENGINE & SNOWBALL
+// 11. HEURISTIC AI ENGINE (Advanced Real-World Logic)
 // ==========================================
 document.getElementById('aiBtn').addEventListener('click', () => {
     const insightBox = document.getElementById('aiInsights');
@@ -366,32 +366,75 @@ document.getElementById('aiBtn').addEventListener('click', () => {
         btn.innerHTML = "Generate Insights"; btn.disabled = false;
         skeleton.classList.add('d-none'); 
 
-        let foodTotal = 0; let shoppingTotal = 0; let emiTotal = 0; let grandTotal = 0;
+        let grandTotal = 0;
+        let catTotals = { Food: 0, Travel: 0, Shopping: 0, Entertainment: 0, 'Health care': 0, EMI: 0, Rent: 0, Investment: 0, Emergency: 0, Other: 0 };
+        let catCounts = { Food: 0, Travel: 0, Shopping: 0, Entertainment: 0, 'Health care': 0, EMI: 0, Rent: 0, Investment: 0, Emergency: 0, Other: 0 };
+
+        // Process all expenses to get totals AND frequencies
         expenses.forEach(exp => {
-            let amt = parseFloat(exp.amount); grandTotal += amt;
-            if (exp.cat === 'Food') foodTotal += amt;
-            if (exp.cat === 'Shopping') shoppingTotal += amt;
-            if (exp.cat === 'EMI') emiTotal += amt;
+            let amt = parseFloat(exp.amount); 
+            grandTotal += amt;
+            if(catTotals[exp.cat] !== undefined) {
+                catTotals[exp.cat] += amt;
+                catCounts[exp.cat] += 1;
+            }
         });
 
         let subTotal = subscriptions.reduce((acc, sub) => acc + sub.amount, 0);
         let remainingBalance = userSalary - grandTotal;
         let insights = [];
-        let spendPercent = ((grandTotal / userSalary) * 100).toFixed(1);
+        
+        // --- 1. TIME-AWARE VELOCITY (PACING) ---
+        const today = new Date();
+        const dayOfMonth = today.getDate();
+        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        const monthProgress = dayOfMonth / daysInMonth; // e.g., 0.5 if it's the 15th
+        const spendPacing = grandTotal / userSalary; // e.g., 0.8 if you spent 80%
 
-        if (subTotal > (userSalary * 0.10)) insights.push(`🔄 <strong>Subscription Alert:</strong> Over 10% of your income goes to recurring bills (${formatINR(subTotal)}). Review your subscriptions to see if you can cancel unused services.`);
-        if (emiTotal > 0 && remainingBalance > 0) {
-            let suggestPct = remainingBalance > (userSalary * 0.3) ? 0.5 : 0.25;
-            let snowballAmt = remainingBalance * suggestPct;
-            insights.push(`📉 <strong>Debt Snowball Strategy:</strong> You have ${formatINR(remainingBalance)} saved. Consider allocating ${formatINR(snowballAmt)} (${suggestPct * 100}%) towards your EMI principal to crush your debt months faster!`);
+        // If you spent 80% of your money but we are only 50% through the month:
+        if (spendPacing > (monthProgress + 0.15) && grandTotal > 0) {
+            let idealSpend = Math.round(userSalary * monthProgress);
+            insights.push(`⏱️ <strong>Pacing Warning:</strong> You are burning cash too fast. It is day ${dayOfMonth} and your ideal spend should be around ${formatINR(idealSpend)}, but you've already spent ${formatINR(grandTotal)}. You need to freeze non-essential spending.`);
         }
-        if (foodTotal > (userSalary * 0.15)) insights.push(`🍔 <strong>Dining Out Limit:</strong> You've spent ${formatINR(foodTotal)} on food. Dropping just 1 restaurant outing this month will keep you on track.`);
-        if (shoppingTotal > (userSalary * 0.10)) insights.push(`🛍️ <strong>Wants Warning:</strong> Shopping expenses are consuming a large portion of your allowance. Consider a 7-day spending freeze.`);
-        if (spendPercent > 80) insights.push(`⚠️ <strong>Burn Rate High:</strong> You have spent ${spendPercent}% of your salary. Pace yourself for the rest of the month.`);
-        if (insights.length === 0 && grandTotal > 0) insights.push(`🌟 <strong>Optimized:</strong> Your spending is perfectly aligned with the 50/30/20 rule. Keep up the great discipline!`);
-        if (grandTotal === 0) insights.push(`💡 Log your first expense to generate AI insights.`);
 
-        insightBox.innerHTML = `<ul class="mb-0 ps-3">${insights.map(i => `<li class="mb-2 text-dark">${i}</li>`).join('')}</ul>`;
+        // --- 2. FREQUENCY & HABIT ANALYSIS ---
+        if (catCounts['Food'] >= 4 && catTotals['Food'] > (userSalary * 0.05)) {
+            let avgMeal = Math.round(catTotals['Food'] / catCounts['Food']);
+            insights.push(`🍔 <strong>Habit Detected:</strong> You've bought food outside ${catCounts['Food']} times, averaging ${formatINR(avgMeal)} per transaction. Replacing just 2 of these with home meals will save you ${formatINR(avgMeal * 2)} instantly.`);
+        }
+        
+        if (catCounts['Shopping'] >= 3) {
+            insights.push(`🛍️ <strong>Impulse Alert:</strong> Frequent shopping trips detected (${catCounts['Shopping']} transactions). Try imposing a "48-hour cart rule" before completing your next online checkout to prevent impulse buys.`);
+        }
+
+        // --- 3. THE 50/30/20 CATEGORY AUDITOR ---
+        let wants = catTotals['Food'] + catTotals['Shopping'] + catTotals['Entertainment'] + catTotals['Travel'] + catTotals['Other'];
+        let savings = catTotals['Investment'] + catTotals['Emergency'];
+        let needs = catTotals['Rent'] + catTotals['EMI'] + catTotals['Health care'] + subTotal;
+
+        if (wants > (userSalary * 0.30)) {
+            let overspend = wants - (userSalary * 0.30);
+            insights.push(`🎭 <strong>Lifestyle Creep:</strong> Your 'Wants' have exceeded the recommended 30% limit by ${formatINR(overspend)}. Audit your Entertainment and Shopping logs.`);
+        }
+
+        if (savings === 0 && dayOfMonth > 15 && remainingBalance > 0) {
+            insights.push(`🛡️ <strong>Zero Safety Net:</strong> You haven't logged any Investments or Emergency funds this month. Consider moving ${formatINR(remainingBalance * 0.20)} into an emergency savings account today.`);
+        }
+
+        // --- 4. DEBT SNOWBALL STRATEGY ---
+        if (catTotals['EMI'] > 0 && remainingBalance > (userSalary * 0.15)) {
+            let snowballAmt = Math.round(remainingBalance * 0.35);
+            insights.push(`📉 <strong>Debt Snowball Opportunity:</strong> You have strong leftover cash. Allocating an extra ${formatINR(snowballAmt)} towards your EMI principal this month will massively reduce your total long-term interest.`);
+        }
+
+        // --- FALLBACKS ---
+        if (insights.length === 0 && grandTotal > 0) {
+            insights.push(`🌟 <strong>Financially Optimized:</strong> Your pacing, habits, and category ratios are exceptional right now. Keep this exact momentum!`);
+        } else if (grandTotal === 0) {
+            insights.push(`💡 Log your recent expenses to generate personalized, data-driven financial strategies.`);
+        }
+
+        insightBox.innerHTML = `<ul class="mb-0 ps-3">${insights.map(i => `<li class="mb-3 text-dark" style="line-height: 1.5;">${i}</li>`).join('')}</ul>`;
         insightBox.classList.remove('d-none');
-    }, 1200); 
+    }, 1500); 
 });

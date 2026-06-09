@@ -1,0 +1,13 @@
+{
+  "name": "CacheFlow",
+  "short_name": "CacheFlow",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3135/3135715.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
