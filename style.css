@@ -66,13 +66,10 @@ body {
     z-index: 2000; backdrop-filter: blur(5px);
 }
 
-/* Animations & Gamification */
+/* Animations */
 .transition-width { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s; }
 
-#streakBadge {
-    animation: glow 2s infinite alternate;
-}
-
+#streakBadge { animation: glow 2s infinite alternate; }
 @keyframes glow {
     from { box-shadow: 0 0 5px rgba(220, 53, 69, 0.5); }
     to { box-shadow: 0 0 15px rgba(220, 53, 69, 0.9); }
@@ -110,4 +107,51 @@ body {
 @keyframes slideInRight {
     from { transform: translateX(100%); opacity: 0; }
     to { transform: translateX(0); opacity: 1; }
+}
+
+/* HIGH-FIDELITY PDF SYSTEM COMPILER CSS */
+@media print {
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-size: 12pt;
+    }
+    .bg-app { background-color: #ffffff !important; }
+    .no-print { display: none !important; }
+    .print-header { display: block !important; }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        transform: none !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+    .bg-primary-gradient {
+        background: #f8fafc !important;
+        color: #000000 !important;
+        border: 1px solid #cbd5e1 !important;
+    }
+    .progress {
+        border: 1px solid #000000 !important;
+        background-color: #e2e8f0 !important;
+    }
+    .progress-bar {
+        background-color: #0f172a !important;
+    }
+    .print-full-width { width: 100% !important; flex: 0 0 100% !important; max-width: 100% !important; }
+    .print-half-width { width: 50% !important; flex: 0 0 50% !important; max-width: 50% !important; }
+    
+    .break-before {
+        page-break-before: always;
+        margin-top: 20px;
+    }
+    
+    table { page-break-inside: auto; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    
+    @page {
+        size: A4 portrait;
+        margin: 15mm;
+    }
 }

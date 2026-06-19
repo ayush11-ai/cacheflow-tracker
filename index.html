@@ -3,24 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CacheFlow </title>
+    <title>CacheFlow Tracker</title>
     <link rel="icon" type="image/jpeg" href="goal.jpg">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="manifest" href="manifest.json">
 </head>
 <body class="bg-app">
 
-<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;"></div>
+<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3 no-print" style="z-index: 1055;"></div>
 
-<input type="file" id="importFile" accept=".json" class="d-none">
-
-<div id="onboardingModal" class="modal-overlay d-flex align-items-center justify-content-center d-none">
+<div id="onboardingModal" class="modal-overlay d-flex align-items-center justify-content-center d-none no-print">
     <div class="card shadow-lg p-4 border-0 text-center position-relative" style="max-width: 420px; width: 100%; border-radius: 16px;">
         <button type="button" class="btn-close position-absolute top-0 end-0 m-3 d-none" id="closeModalBtn" aria-label="Close"></button>
         <h4 class="fw-bold mb-2 text-navy">👋 Welcome to CacheFlow</h4>
-        <p class="text-muted small mb-4">Set up your profile to activate the heuristic analysis engine.</p>
+        <p class="text-muted small mb-4">Set up your profile to activate the financial analysis ledger.</p>
         
         <form id="setupForm">
             <div class="mb-3 text-start">
@@ -44,7 +41,7 @@
     </div>
 </div>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-navy mb-4 shadow-sm py-3">
+<nav class="navbar navbar-expand-lg navbar-dark bg-navy mb-4 shadow-sm py-3 no-print">
     <div class="container">
         <a class="navbar-brand fw-bold" href="#">⚡ CacheFlow</a>
         
@@ -58,13 +55,25 @@
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                     <li><a class="dropdown-item" href="#" id="editProfileBtn">Edit Profile & Goals</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" id="exportDataBtn">💾 Backup Data (Export)</a></li>
-                    <li><a class="dropdown-item" href="#" id="triggerImportBtn">📂 Restore Data (Import)</a></li>
+                    <li><a class="dropdown-item" href="#" id="exportPdfBtn">📄 Export Financial Statement (PDF)</a></li>
                 </ul>
             </div>
         </div>
     </div>
 </nav>
+
+<div class="print-header d-none mb-4">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+        <div>
+            <h2 class="fw-bold text-navy mb-0">⚡ CacheFlow Accounts Ledger</h2>
+            <p class="text-muted small mb-0" id="printGenerationMeta">Generated Statement Account History</p>
+        </div>
+        <div class="text-end">
+            <h5 class="fw-bold text-secondary mb-0" id="printUserHolder">User: --</h5>
+            <small class="text-muted" id="printTimestamp">Timestamped Record</small>
+        </div>
+    </div>
+</div>
 
 <div class="container">
     <div class="row mb-4">
@@ -102,7 +111,7 @@
     </div>
 
     <div class="row mb-4">
-        <div class="col-md-4">
+        <div class="col-md-4 no-print">
             <div class="card shadow-sm border-0 mb-4 rounded-4">
                 <div class="card-header bg-white fw-bold py-3 text-navy border-0">📝 Log New Expense</div>
                 <div class="card-body d-flex flex-column justify-content-center">
@@ -146,9 +155,9 @@
             </div>
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-8 print-full-width">
             <div class="row h-100">
-                <div class="col-md-6 mb-4">
+                <div class="col-md-6 mb-4 print-half-width">
                     <div class="card shadow-sm border-0 h-100 rounded-4">
                         <div class="card-header bg-white fw-bold py-3 text-navy border-0">📊 Spending Breakdown</div>
                         <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 250px;">
@@ -156,17 +165,19 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 mb-4">
+                <div class="col-md-6 mb-4 print-half-width">
                     <div class="card shadow-sm border-0 h-100 border-start border-navy border-4 rounded-4 position-relative overflow-hidden">
-                        <div class="card-header bg-white fw-bold py-3 text-navy border-0">💡 AI Financial Advisor</div>
+                        <div class="card-header bg-white fw-bold py-3 text-navy border-0">💡 Engine Financial Insights</div>
                         <div class="card-body d-flex flex-column">
-                            <button id="aiBtn" class="btn btn-outline-navy w-100 mb-3 fw-bold py-2">Generate Insights</button>
-                            <div id="aiSkeleton" class="d-none w-100 h-100">
+                            <button id="aiBtn" class="btn btn-outline-navy w-100 mb-3 fw-bold py-2 no-print">Generate Analytics</button>
+                            <div id="aiSkeleton" class="d-none w-100 h-100 no-print">
                                 <div class="skeleton-box mb-2" style="height: 20px; width: 60%; border-radius: 4px;"></div>
                                 <div class="skeleton-box mb-2" style="height: 15px; width: 100%; border-radius: 4px;"></div>
                                 <div class="skeleton-box mb-2" style="height: 15px; width: 90%; border-radius: 4px;"></div>
                             </div>
-                            <div id="aiInsights" class="d-none text-muted small p-3 bg-light rounded-3 flex-grow-1 overflow-auto"></div>
+                            <div id="aiInsights" class="text-muted small p-3 bg-light rounded-3 flex-grow-1 overflow-auto">
+                                <p class="small text-center mb-0 text-muted">Click generate to calculate system diagnostics.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -174,15 +185,60 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="calendar-wrapper p-3 mb-4 text-center text-sm-start no-print" style="
+        background: rgba(255, 255, 255, 0.45);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    " onmouseenter="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 40px 0 rgba(31, 38, 135, 0.15)';" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 32px 0 rgba(31, 38, 135, 0.08)';">
+        
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);"></div>
+
+        <div class="row align-items-center g-3">
+            <div class="col-md-6">
+                <label for="calendarFilter" class="form-label fw-bold text-dark mb-1 d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                    📅 <span>Temporal Flux Filter</span>
+                </label>
+                <p class="text-muted small mb-0">Isolate records across specific timeline intervals.</p>
+            </div>
+            <div class="col-md-6 text-sm-end">
+                <div class="d-inline-flex flex-column align-items-sm-end gap-2 w-100">
+                    <input type="date" id="calendarFilter" class="form-control" style="
+                        border-radius: 10px;
+                        border: 2px solid #e0e6ed;
+                        padding: 10px 14px;
+                        font-weight: 600;
+                        background: #ffffff;
+                        color: #2d3748;
+                        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+                        transition: all 0.3s ease;
+                        outline: none;
+                    " onfocus="this.style.borderColor='#4facfe'; this.style.boxShadow='0 0 0 4px rgba(79, 172, 254, 0.25)';" onblur="this.style.borderColor='#e0e6ed'; this.style.boxShadow='none';">
+                    
+                    <span id="temporalBadge" class="badge bg-secondary p-2" style="
+                        font-size: 0.75rem; 
+                        letter-spacing: 0.5px; 
+                        text-transform: uppercase;
+                        border-radius: 6px;
+                        font-family: monospace;
+                        transition: all 0.3s ease;
+                    ">👁️ Monitoring All Timelines</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row break-before">
         <div class="col-12">
             <div class="card shadow-sm border-0 rounded-4 mb-5">
                 <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-navy">🧾 Recent Transactions</span>
-                    <div class="d-flex gap-2">
-                        <input type="date" id="calendarFilter" class="form-control form-control-sm border-0 shadow-sm text-muted">
-                        <button id="clearFilterBtn" class="btn btn-sm btn-outline-secondary">Clear</button>
-                    </div>
+                    <span class="fw-bold text-navy">🧾 Financial Record Audit</span>
+                    <button id="clearFilterBtn" class="btn btn-sm btn-outline-secondary no-print">Reset Filter</button>
                 </div>
                 <div class="card-body p-0 table-responsive">
                     <table class="table table-hover align-middle mb-0" id="txTable">
@@ -192,7 +248,7 @@
                                 <th>Description</th>
                                 <th>Category</th>
                                 <th>Amount</th>
-                                <th class="pe-4 text-end">Action</th>
+                                <th class="pe-4 text-end no-print">Action</th>
                             </tr>
                         </thead>
                         <tbody id="tableBody">

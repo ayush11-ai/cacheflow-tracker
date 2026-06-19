@@ -7,13 +7,12 @@ let userName = localStorage.getItem('userName') || '';
 let userSalary = parseFloat(localStorage.getItem('userSalary')) || 0;
 let savingsGoal = parseFloat(localStorage.getItem('savingsGoal')) || 0;
 
-// Data Migration: Ensure every item has a unique ID (Prevents the delete bug)
+// Unique Identifier structural generation
 expenses = expenses.map(exp => exp.id ? exp : { ...exp, id: Date.now() + Math.random() });
 localStorage.setItem('expenses', JSON.stringify(expenses));
 
 const formatINR = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
 
-// Initialize Date Picker & App on load
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
     checkOnboarding();
@@ -119,7 +118,6 @@ document.getElementById('editProfileBtn').addEventListener('click', () => {
     document.getElementById('saveSetupBtn').classList.replace('w-100', 'w-50');
 });
 
-// Modal close bindings
 document.getElementById('closeModalBtn').addEventListener('click', () => document.getElementById('onboardingModal').classList.add('d-none'));
 document.getElementById('cancelSetupBtn').addEventListener('click', () => document.getElementById('onboardingModal').classList.add('d-none'));
 
@@ -136,7 +134,7 @@ function showBanner(msg, type = "success") {
 }
 
 // ==========================================
-// 6. CORE LOGIC: ADD & DELETE TRANSACTIONS
+// 6. CORE LOGIC: TRANSACTIONS MANAGEMENT
 // ==========================================
 document.getElementById('expenseForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -165,11 +163,10 @@ document.getElementById('expenseForm').addEventListener('submit', (e) => {
     document.getElementById('expCat').selectedIndex = 0;
     document.getElementById('expRecurring').checked = false;
     
-    document.getElementById('calendarFilter').value = ''; // Reset filter on new entry
+    document.getElementById('calendarFilter').value = ''; 
     updateDashboard(expenses);
 });
 
-// Event Delegation for Delete Buttons (replaces inline onclick)
 document.getElementById('tableBody').addEventListener('click', (e) => {
     if (e.target.closest('.delete-tx-btn')) {
         const id = parseFloat(e.target.closest('.delete-tx-btn').dataset.id);
@@ -193,67 +190,71 @@ document.getElementById('subscriptionList').addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 7. DATA IMPORT & EXPORT
+// 7. HIGH-FIDELITY PDF PRINTER MATRIX
 // ==========================================
-document.getElementById('exportDataBtn').addEventListener('click', () => {
-    const data = { userName, userSalary, savingsGoal, expenses, subscriptions };
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `CacheFlow_Backup_${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    showBanner("💾 Backup downloaded successfully!", "info");
-});
+document.getElementById('exportPdfBtn').addEventListener('click', () => {
+    // Inject and hydrate data directly into the print header view model inside DOM
+    document.getElementById('printUserHolder').innerText = `User: ${userName || 'Client Account'}`;
+    
+    const now = new Date();
+    document.getElementById('printTimestamp').innerText = `Executed: ${now.toLocaleDateString()} | ${now.toLocaleTimeString()}`;
+    
+    const activeFilter = document.getElementById('calendarFilter').value;
+    document.getElementById('printGenerationMeta').innerText = activeFilter 
+        ? `Filtered Single-Interval Statement Ledger Run: ${activeFilter}` 
+        : `Comprehensive Fiscal Account History Analysis Summary`;
 
-document.getElementById('triggerImportBtn').addEventListener('click', () => {
-    document.getElementById('importFile').click();
-});
-
-document.getElementById('importFile').addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            if(data.userName) localStorage.setItem('userName', data.userName);
-            if(data.userSalary) localStorage.setItem('userSalary', data.userSalary);
-            if(data.savingsGoal) localStorage.setItem('savingsGoal', data.savingsGoal);
-            if(data.expenses) localStorage.setItem('expenses', JSON.stringify(data.expenses));
-            if(data.subscriptions) localStorage.setItem('subscriptions', JSON.stringify(data.subscriptions));
-            
-            showBanner("📂 Data restored successfully! Reloading...", "info");
-            setTimeout(() => location.reload(), 1500); 
-        } catch (error) {
-            alert("Invalid backup file. Please upload a valid JSON generated by CacheFlow.");
-        }
-    };
-    reader.readAsText(file);
+    // Trigger local printing context loop safely
+    window.print();
 });
 
 // ==========================================
-// 8. CALENDAR FILTER
+// 8. CALENDAR TIME INTERVAL FILTER
 // ==========================================
 const calendarFilter = document.getElementById('calendarFilter');
 calendarFilter.addEventListener('change', (e) => {
-    const selectedDate = e.target.value;
-    if (!selectedDate) {
+    const selectedDateStr = e.target.value;
+    const badge = document.getElementById('temporalBadge');
+    
+    if (!selectedDateStr) {
+        badge.className = "badge bg-secondary p-2";
+        badge.innerHTML = "👁️ Monitoring All Timelines";
         updateDashboard(expenses);
         return;
     }
-    const filtered = expenses.filter(exp => exp.isoDate === selectedDate);
+
+    const selectedDate = new Date(selectedDateStr);
+    selectedDate.setHours(0,0,0,0);
+    
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (selectedDate.getTime() === today.getTime()) {
+        badge.style.background = "linear-gradient(135deg, #2ec4b6 0%, #0cb0a3 100%)";
+        badge.innerHTML = "📍 Matrix Location: Present Day";
+    } else if (selectedDate.getTime() < today.getTime()) {
+        badge.style.background = "linear-gradient(135deg, #ff9f1c 0%, #ff6b6b 100%)";
+        badge.innerHTML = "⏳ Temporal View: Archive Past";
+    } else {
+        badge.style.background = "linear-gradient(135deg, #7209b7 0%, #f72585 100%)";
+        badge.innerHTML = "🔮 Prediction Mode: Horizon Line";
+    }
+
+    const filtered = expenses.filter(exp => exp.isoDate === selectedDateStr);
     updateDashboard(filtered, true);
 });
 
 document.getElementById('clearFilterBtn').addEventListener('click', () => {
     calendarFilter.value = ''; 
+    const badge = document.getElementById('temporalBadge');
+    badge.className = "badge bg-secondary p-2";
+    badge.style.background = "";
+    badge.innerHTML = "👁️ Monitoring All Timelines";
     updateDashboard(expenses); 
 });
 
 // ==========================================
-// 9. NO-SPEND STREAK CALCULATION
+// 9. GAMIFICATION STREAK ENGINE
 // ==========================================
 function calculateStreak() {
     if (expenses.length === 0) {
@@ -295,7 +296,7 @@ function updateDashboard(dataArray, isFiltered = false) {
                     <td class="fw-medium text-navy">${exp.desc}</td>
                     <td><span class="badge bg-light text-secondary border">${exp.cat}</span></td>
                     <td class="text-danger fw-bold">${formatINR(exp.amount)}</td>
-                    <td class="text-end pe-4">
+                    <td class="text-end pe-4 no-print">
                         <button class="btn btn-sm text-danger border-0 delete-tx-btn" data-id="${exp.id}">🗑️</button>
                     </td>
                 </tr>
@@ -319,7 +320,7 @@ function updateDashboard(dataArray, isFiltered = false) {
                     <span>${sub.desc} <span class="badge bg-light text-secondary ms-1">${sub.cat}</span></span>
                     <div>
                         <span class="fw-bold text-navy me-2">${formatINR(sub.amount)}</span>
-                        <button class="btn btn-sm text-danger p-0 delete-sub-btn" data-id="${sub.id}" title="Remove Subscription">✖</button>
+                        <button class="btn btn-sm text-danger p-0 delete-sub-btn no-print" data-id="${sub.id}">✖</button>
                     </div>
                 </li>
             `;
@@ -352,89 +353,68 @@ function updateDashboard(dataArray, isFiltered = false) {
 }
 
 // ==========================================
-// 11. HEURISTIC AI ENGINE (Advanced Real-World Logic)
+// 11. HEURISTIC ACCOUNTING METRIC RULES ENGINE
 // ==========================================
 document.getElementById('aiBtn').addEventListener('click', () => {
     const insightBox = document.getElementById('aiInsights');
     const skeleton = document.getElementById('aiSkeleton');
     const btn = document.getElementById('aiBtn');
     
-    btn.innerHTML = "🧠 Running Deep Analysis..."; btn.disabled = true;
+    btn.innerHTML = "🧠 Running Rule Diagnostics..."; btn.disabled = true;
     insightBox.classList.add('d-none'); skeleton.classList.remove('d-none'); 
 
     setTimeout(() => {
-        btn.innerHTML = "Generate Insights"; btn.disabled = false;
+        btn.innerHTML = "Generate Analytics"; btn.disabled = false;
         skeleton.classList.add('d-none'); 
 
-        let grandTotal = 0;
-        let catTotals = { Food: 0, Travel: 0, Shopping: 0, Entertainment: 0, 'Health care': 0, EMI: 0, Rent: 0, Investment: 0, Emergency: 0, Other: 0 };
-        let catCounts = { Food: 0, Travel: 0, Shopping: 0, Entertainment: 0, 'Health care': 0, EMI: 0, Rent: 0, Investment: 0, Emergency: 0, Other: 0 };
+        let foodTotal = 0; let shoppingTotal = 0; let emiTotal = 0; let grandTotal = 0;
+        let catCounts = { Food: 0, Shopping: 0 };
 
-        // Process all expenses to get totals AND frequencies
         expenses.forEach(exp => {
-            let amt = parseFloat(exp.amount); 
-            grandTotal += amt;
-            if(catTotals[exp.cat] !== undefined) {
-                catTotals[exp.cat] += amt;
-                catCounts[exp.cat] += 1;
-            }
+            let amt = parseFloat(exp.amount); grandTotal += amt;
+            if (exp.cat === 'Food') { foodTotal += amt; catCounts.Food++; }
+            if (exp.cat === 'Shopping') { shoppingTotal += amt; catCounts.Shopping++; }
+            if (exp.cat === 'EMI') emiTotal += amt;
         });
 
         let subTotal = subscriptions.reduce((acc, sub) => acc + sub.amount, 0);
         let remainingBalance = userSalary - grandTotal;
         let insights = [];
-        
-        // --- 1. TIME-AWARE VELOCITY (PACING) ---
+        let spendPercent = ((grandTotal / userSalary) * 100).toFixed(1);
+
         const today = new Date();
         const dayOfMonth = today.getDate();
         const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const monthProgress = dayOfMonth / daysInMonth; // e.g., 0.5 if it's the 15th
-        const spendPacing = grandTotal / userSalary; // e.g., 0.8 if you spent 80%
+        const monthProgress = dayOfMonth / daysInMonth; 
+        const spendPacing = grandTotal / userSalary; 
 
-        // If you spent 80% of your money but we are only 50% through the month:
         if (spendPacing > (monthProgress + 0.15) && grandTotal > 0) {
             let idealSpend = Math.round(userSalary * monthProgress);
-            insights.push(`⏱️ <strong>Pacing Warning:</strong> You are burning cash too fast. It is day ${dayOfMonth} and your ideal spend should be around ${formatINR(idealSpend)}, but you've already spent ${formatINR(grandTotal)}. You need to freeze non-essential spending.`);
+            insights.push(`⏱️ <strong>Pacing Alert:</strong> High structural velocity. It is Day ${dayOfMonth} and normal spend scaling trends should be near ${formatINR(idealSpend)}, but you are currently logged at ${formatINR(grandTotal)}. Recommend asset stabilization control.`);
+        }
+        if (catCounts.Food >= 4 && foodTotal > (userSalary * 0.05)) {
+            let avgMeal = Math.round(foodTotal / catCounts.Food);
+            insights.push(`🍔 <strong>Frequency Audit:</strong> Bulk food provisioning outside kitchen intervals detected ${catCounts.Food} times, averaging ${formatINR(avgMeal)} per transaction. Modifying two events preserves ${formatINR(avgMeal * 2)}.`);
+        }
+        if (subTotal > (userSalary * 0.10)) {
+            insights.push(`🔄 <strong>Fixed Cost Load:</strong> Over 10% of liquidity resources scale directly into automated billing profiles (${formatINR(subTotal)}). Review ledger array to prune inactive assets.`);
+        }
+        if (emiTotal > 0 && remainingBalance > 0) {
+            let suggestPct = remainingBalance > (userSalary * 0.3) ? 0.5 : 0.25;
+            let snowballAmt = Math.round(remainingBalance * suggestPct);
+            insights.push(`📉 <strong>Principal Snowball Parameter:</strong> Leftover structural cash detected. Transferring ${formatINR(snowballAmt)} (${suggestPct * 100}%) toward active EMI principal reduce long-term baseline compounding interest.`);
+        }
+        if (shoppingTotal > (userSalary * 0.10)) {
+            insights.push(`🛍️ <strong>Discretionary Threshold:</strong> Volatility spike detected inside variable shopping nodes. Initiate a temporary 7-day restriction pattern.`);
         }
 
-        // --- 2. FREQUENCY & HABIT ANALYSIS ---
-        if (catCounts['Food'] >= 4 && catTotals['Food'] > (userSalary * 0.05)) {
-            let avgMeal = Math.round(catTotals['Food'] / catCounts['Food']);
-            insights.push(`🍔 <strong>Habit Detected:</strong> You've bought food outside ${catCounts['Food']} times, averaging ${formatINR(avgMeal)} per transaction. Replacing just 2 of these with home meals will save you ${formatINR(avgMeal * 2)} instantly.`);
-        }
-        
-        if (catCounts['Shopping'] >= 3) {
-            insights.push(`🛍️ <strong>Impulse Alert:</strong> Frequent shopping trips detected (${catCounts['Shopping']} transactions). Try imposing a "48-hour cart rule" before completing your next online checkout to prevent impulse buys.`);
-        }
-
-        // --- 3. THE 50/30/20 CATEGORY AUDITOR ---
-        let wants = catTotals['Food'] + catTotals['Shopping'] + catTotals['Entertainment'] + catTotals['Travel'] + catTotals['Other'];
-        let savings = catTotals['Investment'] + catTotals['Emergency'];
-        let needs = catTotals['Rent'] + catTotals['EMI'] + catTotals['Health care'] + subTotal;
-
-        if (wants > (userSalary * 0.30)) {
-            let overspend = wants - (userSalary * 0.30);
-            insights.push(`🎭 <strong>Lifestyle Creep:</strong> Your 'Wants' have exceeded the recommended 30% limit by ${formatINR(overspend)}. Audit your Entertainment and Shopping logs.`);
-        }
-
-        if (savings === 0 && dayOfMonth > 15 && remainingBalance > 0) {
-            insights.push(`🛡️ <strong>Zero Safety Net:</strong> You haven't logged any Investments or Emergency funds this month. Consider moving ${formatINR(remainingBalance * 0.20)} into an emergency savings account today.`);
-        }
-
-        // --- 4. DEBT SNOWBALL STRATEGY ---
-        if (catTotals['EMI'] > 0 && remainingBalance > (userSalary * 0.15)) {
-            let snowballAmt = Math.round(remainingBalance * 0.35);
-            insights.push(`📉 <strong>Debt Snowball Opportunity:</strong> You have strong leftover cash. Allocating an extra ${formatINR(snowballAmt)} towards your EMI principal this month will massively reduce your total long-term interest.`);
-        }
-
-        // --- FALLBACKS ---
         if (insights.length === 0 && grandTotal > 0) {
-            insights.push(`🌟 <strong>Financially Optimized:</strong> Your pacing, habits, and category ratios are exceptional right now. Keep this exact momentum!`);
+            insights.push(`🌟 <strong>Ledger Balance Optimal:</strong> Fiscal transaction metrics and category margins follow standard strict formatting structures perfectly.`);
         } else if (grandTotal === 0) {
-            insights.push(`💡 Log your recent expenses to generate personalized, data-driven financial strategies.`);
+            insights.push(`💡 Input transaction entries into standard array matrices to evaluate mathematical optimization heuristics.`);
         }
 
-        insightBox.innerHTML = `<ul class="mb-0 ps-3">${insights.map(i => `<li class="mb-3 text-dark" style="line-height: 1.5;">${i}</li>`).join('')}</ul>`;
+        insightBox.innerHTML = `<ul class="mb-0 ps-3">${insights.map(i => `<li class="mb-3 text-dark">${i}</li>`).join('')}</ul>`;
         insightBox.classList.remove('d-none');
-    }, 1500); 
+    }, 1200); 
 });
