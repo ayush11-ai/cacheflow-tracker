@@ -48,11 +48,11 @@ body {
 .form-control, .form-select { background-color: #f8fafc !important; }
 
 /* LOAD ANIMATIONS & SPLASH SCREEN */
+/* Layout fix: height set to 100vh to ensure it covers viewport */
 .splash-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
     background-color: #0f172a; z-index: 3000;
     transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1), opacity 0.5s ease;
-
 }
 .splash-content { animation: pulseLoad 1.8s ease-in-out infinite alternate; }
 .splash-logo { width: 90px; height: 90px; border-radius: 22px; object-fit: cover; }

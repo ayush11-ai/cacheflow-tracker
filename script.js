@@ -31,11 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     }, 1300);
 
-    // Two Second Auto-Running Controller
+    // Two Second Auto-Running Controller (LAYOUT BUG FIX INCLUDED)
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         splash.style.transform = "translateY(-100%)";
         splash.style.opacity = "0";
+        // Ensure splash screen is removed from document flow to fix spacing issue
         setTimeout(() => { splash.style.display = "none"; }, 600);
         
         // After Splash, Route the User correctly
@@ -217,6 +218,9 @@ document.getElementById('expenseForm').addEventListener('submit', (e) => {
     expenses.unshift({ id: Date.now() + Math.random(), isoDate: rawDate, date: displayDate, desc, cat: rawCat, amount }); 
     localStorage.setItem('expenses', JSON.stringify(expenses));
     
+    // VERCEL ANALYTICS: Track Expense Added
+    if (typeof va !== 'undefined') va('event', 'Expense Logged');
+    
     showBanner(`💸 <strong>${formatINR(amount)}</strong> logged for ${rawCat}.`);
     
     document.getElementById('expDesc').value = '';
@@ -282,6 +286,9 @@ document.getElementById('confirmExportBtn').addEventListener('click', () => {
     const now = new Date();
     document.getElementById('printTimestamp').innerText = `Executed: ${now.toLocaleDateString()} | ${now.toLocaleTimeString()}`;
     document.getElementById('printGenerationMeta').innerText = metaText;
+
+    // VERCEL ANALYTICS: Track PDF Generation
+    if (typeof va !== 'undefined') va('event', 'PDF Exported');
 
     updateDashboard(filteredToPrint, true);
     exportModal.classList.add('d-none');
@@ -399,6 +406,9 @@ document.getElementById('aiBtn').addEventListener('click', () => {
     const skeleton = document.getElementById('aiSkeleton');
     const btn = document.getElementById('aiBtn');
     
+    // VERCEL ANALYTICS: Track Diagnostic Run
+    if (typeof va !== 'undefined') va('event', 'Diagnostic Run');
+
     btn.innerHTML = "🧠 Compiling Analytics..."; btn.disabled = true;
     insightBox.classList.add('d-none'); skeleton.classList.remove('d-none'); 
 
