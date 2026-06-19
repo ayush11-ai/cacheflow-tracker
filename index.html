@@ -9,10 +9,6 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
-    <script>
-        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
     <script defer src="https://cloud.umami.is/script.js" data-website-id="15552e29-460e-46e4-9200-72fdef859851"></script>
 </head>
 <body class="bg-app">
@@ -34,7 +30,7 @@
 </div>
 
 <div id="firstTimeTourOverlay" class="splash-overlay d-flex align-items-center justify-content-center d-none no-print" style="z-index: 2500;">
-    <div class="card shadow-lg p-5 border-0 text-center modal-pop bg-white" style="max-width: 450px; width: 90%; border-radius: 20px;">
+    <div class="card shadow-lg p-4 p-md-5 border-0 text-center modal-pop bg-white" style="max-width: 450px; width: 90%; border-radius: 20px;">
         
         <div class="d-flex justify-content-center gap-2 mb-4" id="tourDots">
             <div class="tour-dot active-dot" id="dot0"></div>
@@ -45,19 +41,19 @@
         <div class="tour-slide d-block" id="tour0">
             <div class="mb-3" style="font-size: 3.5rem;">📊</div>
             <h3 class="fw-bold text-navy mb-2">Track Quickly ⚡</h3>
-            <p class="text-muted mb-4 px-3" style="font-size: 0.95rem;">Log your daily spending easily 💸. Watch your custom chart update in real-time to see exactly where your money goes.</p>
+            <p class="text-muted mb-4 px-2 px-md-3" style="font-size: 0.95rem;">Log your daily spending easily 💸. Watch your custom chart update in real-time to see exactly where your money goes.</p>
         </div>
 
         <div class="tour-slide d-none" id="tour1">
             <div class="mb-3" style="font-size: 3.5rem;">💡</div>
             <h3 class="fw-bold text-navy mb-2">Get Smart Tips 🧠</h3>
-            <p class="text-muted mb-4 px-3" style="font-size: 0.95rem;">Click <strong>"Run Deep Diagnostic"</strong> to get a clever breakdown of your habits. We'll give you personalized tips to help you save more money 💰.</p>
+            <p class="text-muted mb-4 px-2 px-md-3" style="font-size: 0.95rem;">Click <strong>"Run Deep Diagnostic"</strong> to get a clever breakdown of your habits. We'll give you personalized tips to help you save more money 💰.</p>
         </div>
 
         <div class="tour-slide d-none" id="tour2">
             <div class="mb-3" style="font-size: 3.5rem;">📄</div>
             <h3 class="fw-bold text-navy mb-2">Download Freely 📥</h3>
-            <p class="text-muted mb-4 px-3" style="font-size: 0.95rem;">Need a record? Click <strong>"Export PDF"</strong> at the top to instantly download a clean, professional summary of your expenses 📑.</p>
+            <p class="text-muted mb-4 px-2 px-md-3" style="font-size: 0.95rem;">Need a record? Click <strong>"Export PDF"</strong> at the top to instantly download a clean, professional summary of your expenses 📑.</p>
         </div>
 
         <div class="mt-2">
@@ -71,7 +67,7 @@
     <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3 no-print" style="z-index: 1055;"></div>
 
     <div id="onboardingModal" class="modal-overlay d-flex align-items-center justify-content-center d-none no-print">
-        <div class="card shadow-lg p-4 border-0 text-center position-relative modal-pop" style="max-width: 420px; width: 100%; border-radius: 16px;">
+        <div class="card shadow-lg p-4 border-0 text-center position-relative modal-pop" style="max-width: 420px; width: 90%; border-radius: 16px;">
             <button type="button" class="btn-close position-absolute top-0 end-0 m-3 d-none" id="closeModalBtn" aria-label="Close"></button>
             <h4 class="fw-bold mb-2 text-navy">👋 Let's Get Started</h4>
             <p class="text-muted small mb-4">Set up your profile to activate the financial ledger.</p>
@@ -99,7 +95,7 @@
     </div>
 
     <div id="exportModal" class="modal-overlay d-flex align-items-center justify-content-center d-none no-print">
-        <div class="card shadow-lg p-4 border-0 text-center position-relative modal-pop" style="max-width: 400px; width: 100%; border-radius: 16px;">
+        <div class="card shadow-lg p-4 border-0 text-center position-relative modal-pop" style="max-width: 400px; width: 90%; border-radius: 16px;">
             <button type="button" class="btn-close position-absolute top-0 end-0 m-3" id="closeExportModalBtn" aria-label="Close"></button>
             <h4 class="fw-bold mb-2 text-navy">📄 Export Statement</h4>
             <p class="text-muted small mb-4">Select the time range for your financial PDF report.</p>

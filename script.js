@@ -31,12 +31,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 200);
     }, 1300);
 
-    // Two Second Auto-Running Controller (LAYOUT BUG FIX INCLUDED)
+    // Two Second Auto-Running Controller
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         splash.style.transform = "translateY(-100%)";
         splash.style.opacity = "0";
-        // Ensure splash screen is removed from document flow to fix spacing issue
         setTimeout(() => { splash.style.display = "none"; }, 600);
         
         // After Splash, Route the User correctly
@@ -52,10 +51,8 @@ function routeUserFlow() {
     const mainContent = document.getElementById('appContainer');
     
     if (!hasFinishedTour) {
-        // First Time User: Show 3-Screen Tour
         document.getElementById('firstTimeTourOverlay').classList.remove('d-none');
     } else if (!userName || !userSalary || !savingsGoal) {
-        // Returning User, but profile incomplete: Go to Setup Form
         mainContent.style.display = "block";
         setTimeout(() => { mainContent.style.opacity = "1"; }, 50);
         
@@ -63,7 +60,6 @@ function routeUserFlow() {
         document.getElementById('closeModalBtn').classList.add('d-none'); 
         document.getElementById('cancelSetupBtn').classList.add('d-none');
     } else {
-        // Returning User: Go straight to Dashboard
         mainContent.style.display = "block";
         setTimeout(() => { mainContent.style.opacity = "1"; }, 50);
         document.getElementById('welcomeMessage').innerText = `${userName}`;
@@ -88,7 +84,6 @@ document.getElementById('nextTourBtn').addEventListener('click', () => {
             document.getElementById('nextTourBtn').innerText = "Let's Get Started 🚀";
         }
     } else {
-        // Tour Complete. Save to local storage, hide tour, show setup modal.
         localStorage.setItem('tourCompleted', 'true');
         document.getElementById('firstTimeTourOverlay').classList.add('d-none');
         
@@ -103,7 +98,7 @@ document.getElementById('nextTourBtn').addEventListener('click', () => {
 });
 
 // ==========================================
-// 4. PROFILE SETUP SETTINGS
+// 4. PROFILE SETUP SETTINGS (MOBILE JUMP FIXED)
 // ==========================================
 document.getElementById('setupForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -120,7 +115,9 @@ document.getElementById('setupForm').addEventListener('submit', (e) => {
     updateDashboard(expenses);
 });
 
-document.getElementById('editProfileBtn').addEventListener('click', () => {
+// Fix: e.preventDefault() stops the page from jumping to top on mobile
+document.getElementById('editProfileBtn').addEventListener('click', (e) => {
+    e.preventDefault();
     document.getElementById('initName').value = userName;
     document.getElementById('initSalary').value = userSalary;
     document.getElementById('initGoal').value = savingsGoal;
@@ -168,7 +165,7 @@ function showBanner(msg, type="success") {
 }
 
 // ==========================================
-// 6. CHART.JS CONFIGURATION (STABLE)
+// 6. CHART.JS CONFIGURATION
 // ==========================================
 const centerTextPlugin = {
     id: 'centerText',
@@ -243,16 +240,24 @@ document.getElementById('tableBody').addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 8. SMART EXPORT PDF ENGINE
+// 8. SMART EXPORT PDF ENGINE (MOBILE POPUP BLOCKED FIX)
 // ==========================================
 const exportModal = document.getElementById('exportModal');
 const exportRange = document.getElementById('exportRange');
 const exportDateContainer = document.getElementById('exportDateContainer');
 
 function openExportModal() { exportModal.classList.remove('d-none'); }
+
 document.getElementById('exportPdfBtnMain').addEventListener('click', openExportModal);
+
+// Fix: preventDefault ensures mobile screen doesn't jump
 const mobileBtn = document.getElementById('exportPdfBtnMobile');
-if(mobileBtn) mobileBtn.addEventListener('click', openExportModal);
+if(mobileBtn) {
+    mobileBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openExportModal();
+    });
+}
 
 document.getElementById('closeExportModalBtn').addEventListener('click', () => exportModal.classList.add('d-none'));
 
@@ -293,7 +298,8 @@ document.getElementById('confirmExportBtn').addEventListener('click', () => {
     updateDashboard(filteredToPrint, true);
     exportModal.classList.add('d-none');
 
-    setTimeout(() => { window.print(); }, 400);
+    // FIX: Removed setTimeout. Instantly triggering print prevents mobile browsers from blocking it
+    window.print(); 
 });
 
 window.addEventListener('afterprint', () => {
@@ -399,7 +405,7 @@ function updateDashboard(dataArray = expenses, isFiltered = false) {
 }
 
 // ==========================================
-// 12. ADVANCED HEURISTIC RULES ENGINE (HUMAN-FRIENDLY)
+// 12. ADVANCED HEURISTIC RULES ENGINE 
 // ==========================================
 document.getElementById('aiBtn').addEventListener('click', () => {
     const insightBox = document.getElementById('aiInsights');
