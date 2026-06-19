@@ -218,8 +218,8 @@ document.getElementById('expenseForm').addEventListener('submit', (e) => {
     expenses.unshift({ id: Date.now() + Math.random(), isoDate: rawDate, date: displayDate, desc, cat: rawCat, amount }); 
     localStorage.setItem('expenses', JSON.stringify(expenses));
     
-    // VERCEL ANALYTICS: Track Expense Added
-    if (typeof va !== 'undefined') va('event', 'Expense Logged');
+    // UMAMI ANALYTICS: Track Expense Added
+    if (window.umami) umami.track('Expense Logged');
     
     showBanner(`💸 <strong>${formatINR(amount)}</strong> logged for ${rawCat}.`);
     
@@ -287,8 +287,8 @@ document.getElementById('confirmExportBtn').addEventListener('click', () => {
     document.getElementById('printTimestamp').innerText = `Executed: ${now.toLocaleDateString()} | ${now.toLocaleTimeString()}`;
     document.getElementById('printGenerationMeta').innerText = metaText;
 
-    // VERCEL ANALYTICS: Track PDF Generation
-    if (typeof va !== 'undefined') va('event', 'PDF Exported');
+    // UMAMI ANALYTICS: Track PDF Generation
+    if (window.umami) umami.track('PDF Exported');
 
     updateDashboard(filteredToPrint, true);
     exportModal.classList.add('d-none');
@@ -399,15 +399,15 @@ function updateDashboard(dataArray = expenses, isFiltered = false) {
 }
 
 // ==========================================
-// 12. ADVANCED HEURISTIC RULES ENGINE
+// 12. ADVANCED HEURISTIC RULES ENGINE (HUMAN-FRIENDLY)
 // ==========================================
 document.getElementById('aiBtn').addEventListener('click', () => {
     const insightBox = document.getElementById('aiInsights');
     const skeleton = document.getElementById('aiSkeleton');
     const btn = document.getElementById('aiBtn');
     
-    // VERCEL ANALYTICS: Track Diagnostic Run
-    if (typeof va !== 'undefined') va('event', 'Diagnostic Run');
+    // UMAMI ANALYTICS: Track Diagnostic Run
+    if (window.umami) umami.track('Diagnostic Run');
 
     btn.innerHTML = "🧠 Compiling Analytics..."; btn.disabled = true;
     insightBox.classList.add('d-none'); skeleton.classList.remove('d-none'); 
