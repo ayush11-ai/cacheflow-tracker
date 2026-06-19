@@ -20,14 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         featureText.style.opacity = '0'; featureText.style.transform = 'translateY(5px)';
         setTimeout(() => {
-            featureText.innerHTML = "📄 Download Freely."; featureText.style.opacity = '1'; featureText.style.transform = 'translateY(0)';
+            featureText.innerHTML = "Download Freely."; featureText.style.opacity = '1'; featureText.style.transform = 'translateY(0)';
         }, 200); 
     }, 600);
 
     setTimeout(() => {
         featureText.style.opacity = '0'; featureText.style.transform = 'translateY(5px)';
         setTimeout(() => {
-            featureText.innerHTML = "🧠 Be Smart."; featureText.style.opacity = '1'; featureText.style.transform = 'translateY(0)';
+            featureText.innerHTML = "Be Smart."; featureText.style.opacity = '1'; featureText.style.transform = 'translateY(0)';
         }, 200);
     }, 1300);
 
@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
         splash.style.opacity = "0";
         setTimeout(() => { splash.style.display = "none"; }, 600);
         
-        // After Splash, Route the User correctly
         routeUserFlow();
     }, 2000); 
 });
@@ -81,7 +80,7 @@ document.getElementById('nextTourBtn').addEventListener('click', () => {
         document.getElementById(`tour${tourSlide}`).classList.replace('d-none', 'd-block');
         document.getElementById(`dot${tourSlide}`).classList.add('active-dot');
         if (tourSlide === 2) {
-            document.getElementById('nextTourBtn').innerText = "Let's Get Started 🚀";
+            document.getElementById('nextTourBtn').innerText = "Let's Get Started";
         }
     } else {
         localStorage.setItem('tourCompleted', 'true');
@@ -98,7 +97,7 @@ document.getElementById('nextTourBtn').addEventListener('click', () => {
 });
 
 // ==========================================
-// 4. PROFILE SETUP SETTINGS (MOBILE JUMP FIXED)
+// 4. PROFILE SETUP SETTINGS
 // ==========================================
 document.getElementById('setupForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -115,7 +114,6 @@ document.getElementById('setupForm').addEventListener('submit', (e) => {
     updateDashboard(expenses);
 });
 
-// Fix: e.preventDefault() stops the page from jumping to top on mobile
 document.getElementById('editProfileBtn').addEventListener('click', (e) => {
     e.preventDefault();
     document.getElementById('initName').value = userName;
@@ -215,10 +213,9 @@ document.getElementById('expenseForm').addEventListener('submit', (e) => {
     expenses.unshift({ id: Date.now() + Math.random(), isoDate: rawDate, date: displayDate, desc, cat: rawCat, amount }); 
     localStorage.setItem('expenses', JSON.stringify(expenses));
     
-    // UMAMI ANALYTICS: Track Expense Added
     if (window.umami) umami.track('Expense Logged');
     
-    showBanner(`💸 <strong>${formatINR(amount)}</strong> logged for ${rawCat}.`);
+    showBanner(`<strong>${formatINR(amount)}</strong> logged for ${rawCat}.`);
     
     document.getElementById('expDesc').value = '';
     document.getElementById('expAmount').value = '';
@@ -240,7 +237,7 @@ document.getElementById('tableBody').addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 8. SMART EXPORT PDF ENGINE (MOBILE POPUP BLOCKED FIX)
+// 8. SMART EXPORT PDF ENGINE
 // ==========================================
 const exportModal = document.getElementById('exportModal');
 const exportRange = document.getElementById('exportRange');
@@ -248,16 +245,10 @@ const exportDateContainer = document.getElementById('exportDateContainer');
 
 function openExportModal() { exportModal.classList.remove('d-none'); }
 
-document.getElementById('exportPdfBtnMain').addEventListener('click', openExportModal);
-
-// Fix: preventDefault ensures mobile screen doesn't jump
-const mobileBtn = document.getElementById('exportPdfBtnMobile');
-if(mobileBtn) {
-    mobileBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openExportModal();
-    });
-}
+document.getElementById('exportPdfBtnMain').addEventListener('click', (e) => {
+    e.preventDefault();
+    openExportModal();
+});
 
 document.getElementById('closeExportModalBtn').addEventListener('click', () => exportModal.classList.add('d-none'));
 
@@ -282,7 +273,7 @@ document.getElementById('confirmExportBtn').addEventListener('click', () => {
     } 
     else if (rangeType === 'date') {
         const specificDate = document.getElementById('exportSpecificDate').value;
-        if (!specificDate) { showBanner('⚠️ Please select a date first.', 'error'); return; }
+        if (!specificDate) { showBanner('Please select a date first.', 'error'); return; }
         filteredToPrint = expenses.filter(exp => exp.isoDate === specificDate);
         metaText = `Statement History Logs for Selected Date: ${specificDate}`;
     }
@@ -292,13 +283,11 @@ document.getElementById('confirmExportBtn').addEventListener('click', () => {
     document.getElementById('printTimestamp').innerText = `Executed: ${now.toLocaleDateString()} | ${now.toLocaleTimeString()}`;
     document.getElementById('printGenerationMeta').innerText = metaText;
 
-    // UMAMI ANALYTICS: Track PDF Generation
     if (window.umami) umami.track('PDF Exported');
 
     updateDashboard(filteredToPrint, true);
     exportModal.classList.add('d-none');
 
-    // FIX: Removed setTimeout. Instantly triggering print prevents mobile browsers from blocking it
     window.print(); 
 });
 
@@ -368,7 +357,7 @@ function updateDashboard(dataArray = expenses, isFiltered = false) {
                     <td><span class="badge bg-light text-secondary border">${exp.cat}</span></td>
                     <td class="text-danger fw-bold">${formatINR(exp.amount)}</td>
                     <td class="text-end pe-4 no-print">
-                        <button class="btn btn-sm text-danger border-0 delete-tx-btn btn-scale" data-id="${exp.id}">🗑️</button>
+                        <button class="btn btn-sm text-danger border-0 fw-bold delete-tx-btn btn-scale" data-id="${exp.id}">Delete</button>
                     </td>
                 </tr>
             `;
@@ -412,10 +401,9 @@ document.getElementById('aiBtn').addEventListener('click', () => {
     const skeleton = document.getElementById('aiSkeleton');
     const btn = document.getElementById('aiBtn');
     
-    // UMAMI ANALYTICS: Track Diagnostic Run
     if (window.umami) umami.track('Diagnostic Run');
 
-    btn.innerHTML = "🧠 Compiling Analytics..."; btn.disabled = true;
+    btn.innerHTML = "Compiling Analytics..."; btn.disabled = true;
     insightBox.classList.add('d-none'); skeleton.classList.remove('d-none'); 
 
     setTimeout(() => {
@@ -439,10 +427,10 @@ document.getElementById('aiBtn').addEventListener('click', () => {
         let projectedSpend = (grandTotal / currentDay) * totalDays;
         if (projectedSpend > userSalary && currentDay > 3) {
             let deficit = projectedSpend - userSalary;
-            insights.push(`🚨 <strong>Overspending Warning:</strong> You are spending about ${formatINR(grandTotal/currentDay)} a day. If you keep this up, you'll be short by <strong>${formatINR(deficit)}</strong> at the end of the month. Try to freeze spending for a couple of days!`);
+            insights.push(`<strong>Overspending Warning:</strong> You are spending about ${formatINR(grandTotal/currentDay)} a day. If you keep this up, you'll be short by <strong>${formatINR(deficit)}</strong> at the end of the month. Try to freeze spending for a couple of days.`);
         } else if (projectedSpend < userSalary && grandTotal > 0 && currentDay > 5) {
             let surplus = userSalary - projectedSpend;
-            insights.push(`🚀 <strong>On Track:</strong> Great job! You are spending wisely. If you keep this up, you'll end the month with an extra <strong>${formatINR(surplus)}</strong> saved.`);
+            insights.push(`<strong>On Track:</strong> Great job! You are spending wisely. If you keep this up, you'll end the month with an extra <strong>${formatINR(surplus)}</strong> saved.`);
         }
 
         let wants = totals['Food'] + totals['Shopping'] + totals['Entertainment'] + totals['Other'];
@@ -450,30 +438,30 @@ document.getElementById('aiBtn').addEventListener('click', () => {
         
         if (wantsPercent > 30) {
             let biggestDrain = totals['Food'] > totals['Shopping'] ? 'Food' : 'Shopping';
-            insights.push(`⚖️ <strong>Want vs. Need:</strong> You are spending a bit too much on fun and lifestyle stuff (mostly on <strong>${biggestDrain}</strong>). Try to dial this back to save more of your hard-earned money.`);
+            insights.push(`<strong>Want vs. Need:</strong> You are spending a bit too much on fun and lifestyle stuff (mostly on <strong>${biggestDrain}</strong>). Try to dial this back to save more of your hard-earned money.`);
         }
 
         let foodCount = expenses.filter(e => e.cat === 'Food').length;
         if (foodCount >= 4) {
             let avgFood = totals['Food'] / foodCount;
-            insights.push(`🍔 <strong>Food Habit:</strong> You've ordered food ${foodCount} times, spending about ${formatINR(avgFood)} each time. Skipping just 2 of these orders next time will easily save you <strong>${formatINR(avgFood * 2)}</strong>!`);
+            insights.push(`<strong>Food Habit:</strong> You've ordered food ${foodCount} times, spending about ${formatINR(avgFood)} each time. Skipping just 2 of these orders next time will easily save you <strong>${formatINR(avgFood * 2)}</strong>.`);
         }
 
         let largeTx = expenses.filter(e => e.amount > (userSalary * 0.15));
         if (largeTx.length > 0) {
-            insights.push(`📉 <strong>Big Expense:</strong> Your payment for '${largeTx[0].desc}' took up a massive chunk of your budget all at once. Be extra careful with big purchases early in the month!`);
+            insights.push(`<strong>Big Expense:</strong> Your payment for '${largeTx[0].desc}' took up a massive chunk of your budget all at once. Be extra careful with big purchases early in the month.`);
         }
 
         let daysWithSpends = new Set(expenses.map(e => e.isoDate)).size;
         let zeroDays = currentDay - daysWithSpends;
         if (zeroDays >= 4 && grandTotal > 0) {
-            insights.push(`🛡️ <strong>Great Habit:</strong> You didn't spend any money at all for ${zeroDays} days this month! Building 'Zero-Spend Days' is a super fast way to hit your savings goal.`);
+            insights.push(`<strong>Great Habit:</strong> You didn't spend any money at all for ${zeroDays} days this month. Building 'Zero-Spend Days' is a super fast way to hit your savings goal.`);
         }
 
         if (insights.length === 0 && grandTotal > 0) {
-            insights.push(`🌟 <strong>Looking Good:</strong> Your spending is perfectly balanced right now. Keep tracking your expenses to stay on target!`);
+            insights.push(`<strong>Looking Good:</strong> Your spending is perfectly balanced right now. Keep tracking your expenses to stay on target.`);
         } else if (grandTotal === 0) {
-            insights.push(`💡 Log some expenses so the app can start giving you smart tips on how to save money.`);
+            insights.push(`Log some expenses so the app can start giving you smart tips on how to save money.`);
         }
 
         insightBox.innerHTML = `<ul class="mb-0 ps-3" style="animation: slideInLeft 0.5s ease-out forwards;">
