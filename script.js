@@ -1,13 +1,11 @@
 // ==========================================
-// 1. STATE & DATA INITIALIZATION
+// 1. STATE, DATA, & SPLASH INITIALIZATION
 // ==========================================
 let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
-let subscriptions = JSON.parse(localStorage.getItem('subscriptions')) || [];
 let userName = localStorage.getItem('userName') || '';
 let userSalary = parseFloat(localStorage.getItem('userSalary')) || 0;
 let savingsGoal = parseFloat(localStorage.getItem('savingsGoal')) || 0;
 
-// Unique Identifier structural generation
 expenses = expenses.map(exp => exp.id ? exp : { ...exp, id: Date.now() + Math.random() });
 localStorage.setItem('expenses', JSON.stringify(expenses));
 
@@ -15,19 +13,137 @@ const formatINR = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', c
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
-    checkOnboarding();
+    document.getElementById('exportSpecificDate').value = new Date().toISOString().split('T')[0];
+    
+    // Feature Carousel Text Animation for 2-Second Splash
+    const featureText = document.getElementById('featureText');
+    setTimeout(() => {
+        featureText.style.opacity = '0'; featureText.style.transform = 'translateY(5px)';
+        setTimeout(() => {
+            featureText.innerHTML = "📄 Download Freely."; featureText.style.opacity = '1'; featureText.style.transform = 'translateY(0)';
+        }, 200); 
+    }, 600);
+
+    setTimeout(() => {
+        featureText.style.opacity = '0'; featureText.style.transform = 'translateY(5px)';
+        setTimeout(() => {
+            featureText.innerHTML = "🧠 Be Smart."; featureText.style.opacity = '1'; featureText.style.transform = 'translateY(0)';
+        }, 200);
+    }, 1300);
+
+    // Two Second Auto-Running Controller
+    setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        splash.style.transform = "translateY(-100%)";
+        splash.style.opacity = "0";
+        setTimeout(() => { splash.style.display = "none"; }, 600);
+        
+        // After Splash, Route the User correctly
+        routeUserFlow();
+    }, 2000); 
 });
 
 // ==========================================
-// 2. SMART CATEGORIZATION
+// 2. ROUTING LOGIC (TOUR VS DASHBOARD)
+// ==========================================
+function routeUserFlow() {
+    const hasFinishedTour = localStorage.getItem('tourCompleted');
+    const mainContent = document.getElementById('appContainer');
+    
+    if (!hasFinishedTour) {
+        // First Time User: Show 3-Screen Tour
+        document.getElementById('firstTimeTourOverlay').classList.remove('d-none');
+    } else if (!userName || !userSalary || !savingsGoal) {
+        // Returning User, but profile incomplete: Go to Setup Form
+        mainContent.style.display = "block";
+        setTimeout(() => { mainContent.style.opacity = "1"; }, 50);
+        
+        document.getElementById('onboardingModal').classList.remove('d-none');
+        document.getElementById('closeModalBtn').classList.add('d-none'); 
+        document.getElementById('cancelSetupBtn').classList.add('d-none');
+    } else {
+        // Returning User: Go straight to Dashboard
+        mainContent.style.display = "block";
+        setTimeout(() => { mainContent.style.opacity = "1"; }, 50);
+        document.getElementById('welcomeMessage').innerText = `${userName}`;
+        updateDashboard(expenses);
+    }
+}
+
+// ==========================================
+// 3. FIRST-TIME TOUR ENGINE
+// ==========================================
+let tourSlide = 0;
+document.getElementById('nextTourBtn').addEventListener('click', () => {
+    document.getElementById(`tour${tourSlide}`).classList.replace('d-block', 'd-none');
+    document.getElementById(`dot${tourSlide}`).classList.remove('active-dot');
+    
+    tourSlide++;
+    
+    if (tourSlide < 3) {
+        document.getElementById(`tour${tourSlide}`).classList.replace('d-none', 'd-block');
+        document.getElementById(`dot${tourSlide}`).classList.add('active-dot');
+        if (tourSlide === 2) {
+            document.getElementById('nextTourBtn').innerText = "Let's Get Started 🚀";
+        }
+    } else {
+        // Tour Complete. Save to local storage, hide tour, show setup modal.
+        localStorage.setItem('tourCompleted', 'true');
+        document.getElementById('firstTimeTourOverlay').classList.add('d-none');
+        
+        const mainContent = document.getElementById('appContainer');
+        mainContent.style.display = "block";
+        setTimeout(() => { mainContent.style.opacity = "1"; }, 50);
+        
+        document.getElementById('onboardingModal').classList.remove('d-none');
+        document.getElementById('closeModalBtn').classList.add('d-none'); 
+        document.getElementById('cancelSetupBtn').classList.add('d-none');
+    }
+});
+
+// ==========================================
+// 4. PROFILE SETUP SETTINGS
+// ==========================================
+document.getElementById('setupForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    userName = document.getElementById('initName').value.trim();
+    userSalary = parseFloat(document.getElementById('initSalary').value);
+    savingsGoal = parseFloat(document.getElementById('initGoal').value);
+    
+    localStorage.setItem('userName', userName); 
+    localStorage.setItem('userSalary', userSalary); 
+    localStorage.setItem('savingsGoal', savingsGoal);
+    
+    document.getElementById('onboardingModal').classList.add('d-none');
+    document.getElementById('welcomeMessage').innerText = `${userName}`;
+    updateDashboard(expenses);
+});
+
+document.getElementById('editProfileBtn').addEventListener('click', () => {
+    document.getElementById('initName').value = userName;
+    document.getElementById('initSalary').value = userSalary;
+    document.getElementById('initGoal').value = savingsGoal;
+    
+    document.getElementById('onboardingModal').classList.remove('d-none');
+    document.getElementById('closeModalBtn').classList.remove('d-none');
+    document.getElementById('cancelSetupBtn').classList.remove('d-none');
+    document.getElementById('saveSetupBtn').innerText = "Save Changes";
+    document.getElementById('saveSetupBtn').classList.replace('w-100', 'w-50');
+});
+
+document.getElementById('closeModalBtn').addEventListener('click', () => document.getElementById('onboardingModal').classList.add('d-none'));
+document.getElementById('cancelSetupBtn').addEventListener('click', () => document.getElementById('onboardingModal').classList.add('d-none'));
+
+// ==========================================
+// 5. SMART CATEGORIZATION & TOASTS
 // ==========================================
 const keywordMap = {
     'netflix': 'Entertainment', 'movie': 'Entertainment', 'spotify': 'Entertainment',
-    'zomato': 'Food', 'swiggy': 'Food', 'groceries': 'Food',
-    'uber': 'Travel', 'train': 'Travel', 'petrol': 'Travel',
-    'amazon': 'Shopping', 'myntra': 'Shopping', 'clothes': 'Shopping',
+    'zomato': 'Food', 'swiggy': 'Food', 'groceries': 'Food', 'blinkit': 'Food', 'zepto': 'Food',
+    'uber': 'Travel', 'train': 'Travel', 'petrol': 'Travel', 'ola': 'Travel',
+    'amazon': 'Shopping', 'myntra': 'Shopping', 'clothes': 'Shopping', 'flipkart': 'Shopping',
     'doctor': 'Health care', 'medicine': 'Health care', 'hospital': 'Health care',
-    'rent': 'Rent', 'emi': 'EMI', 'sip': 'Investment', 'gym': 'Health care'
+    'rent': 'Rent', 'emi': 'EMI', 'gym': 'Health care'
 };
 
 document.getElementById('expDesc').addEventListener('input', function(e) {
@@ -35,16 +151,23 @@ document.getElementById('expDesc').addEventListener('input', function(e) {
     let catSelect = document.getElementById('expCat');
     for (const [key, category] of Object.entries(keywordMap)) {
         if (text.includes(key)) {
-            Array.from(catSelect.options).forEach(opt => {
-                if (opt.value === category) catSelect.value = category;
-            });
+            Array.from(catSelect.options).forEach(opt => { if (opt.value === category) catSelect.value = category; });
             break;
         }
     }
 });
 
+function showBanner(msg, type="success") {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `custom-toast ${type === 'error' ? 'bg-danger border-danger' : ''}`;
+    toast.innerHTML = msg;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 3000);
+}
+
 // ==========================================
-// 3. CHART.JS CONFIGURATION
+// 6. CHART.JS CONFIGURATION (STABLE)
 // ==========================================
 const centerTextPlugin = {
     id: 'centerText',
@@ -56,9 +179,9 @@ const centerTextPlugin = {
         let centerY = (chartArea.top + chartArea.bottom) / 2;
         ctx.restore();
         let formattedTotal = formatINR(dataTotal);
-        ctx.font = "bold " + (chart.height / 120).toFixed(2) + "em 'Inter', sans-serif";
+        ctx.font = "bold 1.25em 'Inter', sans-serif";
         ctx.textBaseline = "middle"; ctx.fillStyle = "#0f172a"; 
-        ctx.fillText(formattedTotal, centerX - (ctx.measureText(formattedTotal).width / 2), centerY + 12);
+        ctx.fillText(formattedTotal, centerX - (ctx.measureText(formattedTotal).width / 2), centerY);
         ctx.save();
     }
 };
@@ -71,70 +194,15 @@ let expenseChart = new Chart(ctx, {
         datasets: [{
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
             backgroundColor: ['#fb7185', '#38bdf8', '#facc15', '#34d399', '#f472b6', '#818cf8', '#fb923c', '#a78bfa', '#f43f5e', '#94a3b8'],
-            borderWidth: 0, borderRadius: 8, spacing: 4, hoverOffset: 8   
+            borderWidth: 0, borderRadius: 8, spacing: 4, hoverOffset: 6   
         }]
     },
     plugins: [centerTextPlugin],
-    options: { responsive: true, maintainAspectRatio: false, cutout: '82%', plugins: { legend: { position: 'right', labels: { boxWidth: 12 } } } }
+    options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false } } }
 });
 
 // ==========================================
-// 4. ONBOARDING MODAL & PROFILE SETTINGS
-// ==========================================
-function checkOnboarding() {
-    if (!userName || !userSalary || userSalary <= 0 || !savingsGoal || savingsGoal <= 0) {
-        document.getElementById('onboardingModal').classList.remove('d-none');
-        document.getElementById('closeModalBtn').classList.add('d-none'); 
-        document.getElementById('cancelSetupBtn').classList.add('d-none');
-        document.getElementById('saveSetupBtn').innerText = "Initialize Dashboard";
-        document.getElementById('saveSetupBtn').classList.replace('w-50', 'w-100');
-    } else {
-        document.getElementById('onboardingModal').classList.add('d-none');
-        document.getElementById('welcomeMessage').innerText = `${userName}`;
-    }
-    updateDashboard(expenses); 
-}
-
-document.getElementById('setupForm').addEventListener('submit', (e) => {
-    e.preventDefault();
-    userName = document.getElementById('initName').value.trim();
-    userSalary = parseFloat(document.getElementById('initSalary').value);
-    savingsGoal = parseFloat(document.getElementById('initGoal').value);
-    
-    localStorage.setItem('userName', userName); 
-    localStorage.setItem('userSalary', userSalary); 
-    localStorage.setItem('savingsGoal', savingsGoal);
-    checkOnboarding();
-});
-
-document.getElementById('editProfileBtn').addEventListener('click', () => {
-    document.getElementById('initName').value = userName;
-    document.getElementById('initSalary').value = userSalary;
-    document.getElementById('initGoal').value = savingsGoal;
-    document.getElementById('closeModalBtn').classList.remove('d-none');
-    document.getElementById('onboardingModal').classList.remove('d-none');
-    document.getElementById('cancelSetupBtn').classList.remove('d-none');
-    document.getElementById('saveSetupBtn').innerText = "Save Changes";
-    document.getElementById('saveSetupBtn').classList.replace('w-100', 'w-50');
-});
-
-document.getElementById('closeModalBtn').addEventListener('click', () => document.getElementById('onboardingModal').classList.add('d-none'));
-document.getElementById('cancelSetupBtn').addEventListener('click', () => document.getElementById('onboardingModal').classList.add('d-none'));
-
-// ==========================================
-// 5. TOAST NOTIFICATIONS
-// ==========================================
-function showBanner(msg, type = "success") {
-    const container = document.getElementById('toastContainer');
-    const toast = document.createElement('div');
-    toast.className = `custom-toast ${type === 'info' ? 'toast-info' : ''}`;
-    toast.innerHTML = msg;
-    container.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
-}
-
-// ==========================================
-// 6. CORE LOGIC: TRANSACTIONS MANAGEMENT
+// 7. TRANSACTIONS MANAGEMENT
 // ==========================================
 document.getElementById('expenseForm').addEventListener('submit', (e) => {
     e.preventDefault();
@@ -142,16 +210,9 @@ document.getElementById('expenseForm').addEventListener('submit', (e) => {
     const amount = parseFloat(document.getElementById('expAmount').value);
     const rawCat = document.getElementById('expCat').value;
     const rawDate = document.getElementById('expDate').value;
-    const isRecurring = document.getElementById('expRecurring').checked;
 
     const dateObj = new Date(rawDate);
     const displayDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-
-    if (isRecurring) {
-        subscriptions.push({ id: Date.now() + Math.random(), desc, cat: rawCat, amount });
-        localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
-        showBanner(`🔄 Subscription added: ${desc}`, 'info');
-    }
 
     expenses.unshift({ id: Date.now() + Math.random(), isoDate: rawDate, date: displayDate, desc, cat: rawCat, amount }); 
     localStorage.setItem('expenses', JSON.stringify(expenses));
@@ -161,9 +222,8 @@ document.getElementById('expenseForm').addEventListener('submit', (e) => {
     document.getElementById('expDesc').value = '';
     document.getElementById('expAmount').value = '';
     document.getElementById('expCat').selectedIndex = 0;
-    document.getElementById('expRecurring').checked = false;
     
-    document.getElementById('calendarFilter').value = ''; 
+    document.getElementById('calendarFilter').value = '';
     updateDashboard(expenses);
 });
 
@@ -178,83 +238,80 @@ document.getElementById('tableBody').addEventListener('click', (e) => {
     }
 });
 
-document.getElementById('subscriptionList').addEventListener('click', (e) => {
-    if (e.target.closest('.delete-sub-btn')) {
-        const id = parseFloat(e.target.closest('.delete-sub-btn').dataset.id);
-        subscriptions = subscriptions.filter(sub => sub.id !== id);
-        localStorage.setItem('subscriptions', JSON.stringify(subscriptions));
-        
-        const selectedDate = document.getElementById('calendarFilter').value;
-        updateDashboard(selectedDate ? expenses.filter(exp => exp.isoDate === selectedDate) : expenses, !!selectedDate);
-    }
+// ==========================================
+// 8. SMART EXPORT PDF ENGINE
+// ==========================================
+const exportModal = document.getElementById('exportModal');
+const exportRange = document.getElementById('exportRange');
+const exportDateContainer = document.getElementById('exportDateContainer');
+
+function openExportModal() { exportModal.classList.remove('d-none'); }
+document.getElementById('exportPdfBtnMain').addEventListener('click', openExportModal);
+const mobileBtn = document.getElementById('exportPdfBtnMobile');
+if(mobileBtn) mobileBtn.addEventListener('click', openExportModal);
+
+document.getElementById('closeExportModalBtn').addEventListener('click', () => exportModal.classList.add('d-none'));
+
+exportRange.addEventListener('change', (e) => {
+    if (e.target.value === 'date') exportDateContainer.classList.remove('d-none');
+    else exportDateContainer.classList.add('d-none');
 });
 
-// ==========================================
-// 7. HIGH-FIDELITY PDF PRINTER MATRIX
-// ==========================================
-document.getElementById('exportPdfBtn').addEventListener('click', () => {
-    // Inject and hydrate data directly into the print header view model inside DOM
+document.getElementById('confirmExportBtn').addEventListener('click', () => {
+    const rangeType = exportRange.value;
+    let filteredToPrint = expenses;
+    let metaText = "Comprehensive Historical Account Summary";
+
+    if (rangeType === 'month') {
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        filteredToPrint = expenses.filter(exp => {
+            const expDate = new Date(exp.isoDate);
+            return expDate.getMonth() === currentMonth && expDate.getFullYear() === currentYear;
+        });
+        metaText = `Statement History for Current Month (${new Date().toLocaleString('default', { month: 'long', year: 'numeric' })})`;
+    } 
+    else if (rangeType === 'date') {
+        const specificDate = document.getElementById('exportSpecificDate').value;
+        if (!specificDate) { showBanner('⚠️ Please select a date first.', 'error'); return; }
+        filteredToPrint = expenses.filter(exp => exp.isoDate === specificDate);
+        metaText = `Statement History Logs for Selected Date: ${specificDate}`;
+    }
+
     document.getElementById('printUserHolder').innerText = `User: ${userName || 'Client Account'}`;
-    
     const now = new Date();
     document.getElementById('printTimestamp').innerText = `Executed: ${now.toLocaleDateString()} | ${now.toLocaleTimeString()}`;
-    
-    const activeFilter = document.getElementById('calendarFilter').value;
-    document.getElementById('printGenerationMeta').innerText = activeFilter 
-        ? `Filtered Single-Interval Statement Ledger Run: ${activeFilter}` 
-        : `Comprehensive Fiscal Account History Analysis Summary`;
+    document.getElementById('printGenerationMeta').innerText = metaText;
 
-    // Trigger local printing context loop safely
-    window.print();
+    updateDashboard(filteredToPrint, true);
+    exportModal.classList.add('d-none');
+
+    setTimeout(() => { window.print(); }, 400);
+});
+
+window.addEventListener('afterprint', () => {
+    document.getElementById('calendarFilter').value = '';
+    updateDashboard(expenses);
 });
 
 // ==========================================
-// 8. CALENDAR TIME INTERVAL FILTER
+// 9. CALENDAR FILTER ENGINE
 // ==========================================
 const calendarFilter = document.getElementById('calendarFilter');
 calendarFilter.addEventListener('change', (e) => {
     const selectedDateStr = e.target.value;
-    const badge = document.getElementById('temporalBadge');
-    
-    if (!selectedDateStr) {
-        badge.className = "badge bg-secondary p-2";
-        badge.innerHTML = "👁️ Monitoring All Timelines";
-        updateDashboard(expenses);
-        return;
-    }
-
-    const selectedDate = new Date(selectedDateStr);
-    selectedDate.setHours(0,0,0,0);
-    
-    const today = new Date();
-    today.setHours(0,0,0,0);
-
-    if (selectedDate.getTime() === today.getTime()) {
-        badge.style.background = "linear-gradient(135deg, #2ec4b6 0%, #0cb0a3 100%)";
-        badge.innerHTML = "📍 Matrix Location: Present Day";
-    } else if (selectedDate.getTime() < today.getTime()) {
-        badge.style.background = "linear-gradient(135deg, #ff9f1c 0%, #ff6b6b 100%)";
-        badge.innerHTML = "⏳ Temporal View: Archive Past";
-    } else {
-        badge.style.background = "linear-gradient(135deg, #7209b7 0%, #f72585 100%)";
-        badge.innerHTML = "🔮 Prediction Mode: Horizon Line";
-    }
-
+    if (!selectedDateStr) { updateDashboard(expenses); return; }
     const filtered = expenses.filter(exp => exp.isoDate === selectedDateStr);
     updateDashboard(filtered, true);
 });
 
 document.getElementById('clearFilterBtn').addEventListener('click', () => {
     calendarFilter.value = ''; 
-    const badge = document.getElementById('temporalBadge');
-    badge.className = "badge bg-secondary p-2";
-    badge.style.background = "";
-    badge.innerHTML = "👁️ Monitoring All Timelines";
     updateDashboard(expenses); 
 });
 
 // ==========================================
-// 9. GAMIFICATION STREAK ENGINE
+// 10. GAMIFICATION STREAK ENGINE
 // ==========================================
 function calculateStreak() {
     if (expenses.length === 0) {
@@ -278,26 +335,27 @@ function calculateStreak() {
 }
 
 // ==========================================
-// 10. DASHBOARD RENDERER
+// 11. DASHBOARD RENDERER
 // ==========================================
-function updateDashboard(dataArray, isFiltered = false) {
+function updateDashboard(dataArray = expenses, isFiltered = false) {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
     let totals = { Food: 0, Travel: 0, Shopping: 0, Entertainment: 0, 'Health care': 0, EMI: 0, Rent: 0, Investment: 0, Emergency: 0, Other: 0 };
     let grandTotal = 0;
 
     if (dataArray.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted"><em>No expenses found.</em></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted"><em>No expenses logged for this view.</em></td></tr>`;
     } else {
-        dataArray.forEach((exp) => {
+        dataArray.forEach((exp, index) => {
+            let delay = Math.min(index * 0.05, 0.5); 
             tbody.innerHTML += `
-                <tr>
+                <tr class="row-enter" style="animation-delay: ${delay}s;">
                     <td class="text-muted small ps-4">${exp.date}</td>
                     <td class="fw-medium text-navy">${exp.desc}</td>
                     <td><span class="badge bg-light text-secondary border">${exp.cat}</span></td>
                     <td class="text-danger fw-bold">${formatINR(exp.amount)}</td>
                     <td class="text-end pe-4 no-print">
-                        <button class="btn btn-sm text-danger border-0 delete-tx-btn" data-id="${exp.id}">🗑️</button>
+                        <button class="btn btn-sm text-danger border-0 delete-tx-btn btn-scale" data-id="${exp.id}">🗑️</button>
                     </td>
                 </tr>
             `;
@@ -306,32 +364,10 @@ function updateDashboard(dataArray, isFiltered = false) {
         });
     }
 
-    const subList = document.getElementById('subscriptionList');
-    subList.innerHTML = '';
-    let subTotal = 0;
-    
-    if (subscriptions.length === 0) {
-        subList.innerHTML = `<li class="list-group-item text-muted small py-3 border-0">No active subscriptions.</li>`;
-    } else {
-        subscriptions.forEach(sub => {
-            subTotal += sub.amount;
-            subList.innerHTML += `
-                <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-3 py-2 text-muted small">
-                    <span>${sub.desc} <span class="badge bg-light text-secondary ms-1">${sub.cat}</span></span>
-                    <div>
-                        <span class="fw-bold text-navy me-2">${formatINR(sub.amount)}</span>
-                        <button class="btn btn-sm text-danger p-0 delete-sub-btn no-print" data-id="${sub.id}">✖</button>
-                    </div>
-                </li>
-            `;
-        });
-    }
-    document.getElementById('subTotalBadge').innerText = `${formatINR(subTotal)}/mo`;
-
-    expenseChart.data.datasets[0].data = [totals.Food, totals.Travel, totals.Shopping, totals.Entertainment, totals['Health care'], totals.EMI, totals.Rent, totals.Investment, totals.Emergency, totals.Other];
-    expenseChart.update();
-
     if (!isFiltered) {
+        expenseChart.data.datasets[0].data = [totals.Food, totals.Travel, totals.Shopping, totals.Entertainment, totals['Health care'], totals.EMI, totals.Rent, totals.Investment, totals.Emergency, totals.Other];
+        expenseChart.update();
+
         let remainingBalance = userSalary - grandTotal;
         let spendPercentage = userSalary > 0 ? (grandTotal / userSalary) * 100 : 0;
         let progressBar = document.getElementById('goalProgressBar');
@@ -349,72 +385,84 @@ function updateDashboard(dataArray, isFiltered = false) {
         document.getElementById('savedAmountLabel').innerText = `${remainingBalance > 0 ? formatINR(remainingBalance) : formatINR(0)} Saved`;
         
         calculateStreak();
+    } else {
+        expenseChart.data.datasets[0].data = [totals.Food, totals.Travel, totals.Shopping, totals.Entertainment, totals['Health care'], totals.EMI, totals.Rent, totals.Investment, totals.Emergency, totals.Other];
+        expenseChart.update();
     }
 }
 
 // ==========================================
-// 11. HEURISTIC ACCOUNTING METRIC RULES ENGINE
+// 12. ADVANCED HEURISTIC RULES ENGINE
 // ==========================================
 document.getElementById('aiBtn').addEventListener('click', () => {
     const insightBox = document.getElementById('aiInsights');
     const skeleton = document.getElementById('aiSkeleton');
     const btn = document.getElementById('aiBtn');
     
-    btn.innerHTML = "🧠 Running Rule Diagnostics..."; btn.disabled = true;
+    btn.innerHTML = "🧠 Compiling Analytics..."; btn.disabled = true;
     insightBox.classList.add('d-none'); skeleton.classList.remove('d-none'); 
 
     setTimeout(() => {
-        btn.innerHTML = "Generate Analytics"; btn.disabled = false;
+        btn.innerHTML = "Run Deep Diagnostic"; btn.disabled = false;
         skeleton.classList.add('d-none'); 
 
-        let foodTotal = 0; let shoppingTotal = 0; let emiTotal = 0; let grandTotal = 0;
-        let catCounts = { Food: 0, Shopping: 0 };
-
+        let grandTotal = 0;
+        let totals = { Food: 0, Travel: 0, Shopping: 0, Entertainment: 0, 'Health care': 0, EMI: 0, Rent: 0, Investment: 0, Emergency: 0, Other: 0 };
+        
         expenses.forEach(exp => {
-            let amt = parseFloat(exp.amount); grandTotal += amt;
-            if (exp.cat === 'Food') { foodTotal += amt; catCounts.Food++; }
-            if (exp.cat === 'Shopping') { shoppingTotal += amt; catCounts.Shopping++; }
-            if (exp.cat === 'EMI') emiTotal += amt;
+            let amt = parseFloat(exp.amount); 
+            grandTotal += amt;
+            if(totals[exp.cat] !== undefined) totals[exp.cat] += amt;
         });
 
-        let subTotal = subscriptions.reduce((acc, sub) => acc + sub.amount, 0);
-        let remainingBalance = userSalary - grandTotal;
         let insights = [];
-        let spendPercent = ((grandTotal / userSalary) * 100).toFixed(1);
-
         const today = new Date();
-        const dayOfMonth = today.getDate();
-        const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-        const monthProgress = dayOfMonth / daysInMonth; 
-        const spendPacing = grandTotal / userSalary; 
+        const currentDay = today.getDate();
+        const totalDays = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+        
+        let projectedSpend = (grandTotal / currentDay) * totalDays;
+        if (projectedSpend > userSalary && currentDay > 3) {
+            let deficit = projectedSpend - userSalary;
+            insights.push(`🚨 <strong>Overspending Warning:</strong> You are spending about ${formatINR(grandTotal/currentDay)} a day. If you keep this up, you'll be short by <strong>${formatINR(deficit)}</strong> at the end of the month. Try to freeze spending for a couple of days!`);
+        } else if (projectedSpend < userSalary && grandTotal > 0 && currentDay > 5) {
+            let surplus = userSalary - projectedSpend;
+            insights.push(`🚀 <strong>On Track:</strong> Great job! You are spending wisely. If you keep this up, you'll end the month with an extra <strong>${formatINR(surplus)}</strong> saved.`);
+        }
 
-        if (spendPacing > (monthProgress + 0.15) && grandTotal > 0) {
-            let idealSpend = Math.round(userSalary * monthProgress);
-            insights.push(`⏱️ <strong>Pacing Alert:</strong> High structural velocity. It is Day ${dayOfMonth} and normal spend scaling trends should be near ${formatINR(idealSpend)}, but you are currently logged at ${formatINR(grandTotal)}. Recommend asset stabilization control.`);
+        let wants = totals['Food'] + totals['Shopping'] + totals['Entertainment'] + totals['Other'];
+        let wantsPercent = userSalary > 0 ? (wants / userSalary) * 100 : 0;
+        
+        if (wantsPercent > 30) {
+            let biggestDrain = totals['Food'] > totals['Shopping'] ? 'Food' : 'Shopping';
+            insights.push(`⚖️ <strong>Want vs. Need:</strong> You are spending a bit too much on fun and lifestyle stuff (mostly on <strong>${biggestDrain}</strong>). Try to dial this back to save more of your hard-earned money.`);
         }
-        if (catCounts.Food >= 4 && foodTotal > (userSalary * 0.05)) {
-            let avgMeal = Math.round(foodTotal / catCounts.Food);
-            insights.push(`🍔 <strong>Frequency Audit:</strong> Bulk food provisioning outside kitchen intervals detected ${catCounts.Food} times, averaging ${formatINR(avgMeal)} per transaction. Modifying two events preserves ${formatINR(avgMeal * 2)}.`);
+
+        let foodCount = expenses.filter(e => e.cat === 'Food').length;
+        if (foodCount >= 4) {
+            let avgFood = totals['Food'] / foodCount;
+            insights.push(`🍔 <strong>Food Habit:</strong> You've ordered food ${foodCount} times, spending about ${formatINR(avgFood)} each time. Skipping just 2 of these orders next time will easily save you <strong>${formatINR(avgFood * 2)}</strong>!`);
         }
-        if (subTotal > (userSalary * 0.10)) {
-            insights.push(`🔄 <strong>Fixed Cost Load:</strong> Over 10% of liquidity resources scale directly into automated billing profiles (${formatINR(subTotal)}). Review ledger array to prune inactive assets.`);
+
+        let largeTx = expenses.filter(e => e.amount > (userSalary * 0.15));
+        if (largeTx.length > 0) {
+            insights.push(`📉 <strong>Big Expense:</strong> Your payment for '${largeTx[0].desc}' took up a massive chunk of your budget all at once. Be extra careful with big purchases early in the month!`);
         }
-        if (emiTotal > 0 && remainingBalance > 0) {
-            let suggestPct = remainingBalance > (userSalary * 0.3) ? 0.5 : 0.25;
-            let snowballAmt = Math.round(remainingBalance * suggestPct);
-            insights.push(`📉 <strong>Principal Snowball Parameter:</strong> Leftover structural cash detected. Transferring ${formatINR(snowballAmt)} (${suggestPct * 100}%) toward active EMI principal reduce long-term baseline compounding interest.`);
-        }
-        if (shoppingTotal > (userSalary * 0.10)) {
-            insights.push(`🛍️ <strong>Discretionary Threshold:</strong> Volatility spike detected inside variable shopping nodes. Initiate a temporary 7-day restriction pattern.`);
+
+        let daysWithSpends = new Set(expenses.map(e => e.isoDate)).size;
+        let zeroDays = currentDay - daysWithSpends;
+        if (zeroDays >= 4 && grandTotal > 0) {
+            insights.push(`🛡️ <strong>Great Habit:</strong> You didn't spend any money at all for ${zeroDays} days this month! Building 'Zero-Spend Days' is a super fast way to hit your savings goal.`);
         }
 
         if (insights.length === 0 && grandTotal > 0) {
-            insights.push(`🌟 <strong>Ledger Balance Optimal:</strong> Fiscal transaction metrics and category margins follow standard strict formatting structures perfectly.`);
+            insights.push(`🌟 <strong>Looking Good:</strong> Your spending is perfectly balanced right now. Keep tracking your expenses to stay on target!`);
         } else if (grandTotal === 0) {
-            insights.push(`💡 Input transaction entries into standard array matrices to evaluate mathematical optimization heuristics.`);
+            insights.push(`💡 Log some expenses so the app can start giving you smart tips on how to save money.`);
         }
 
-        insightBox.innerHTML = `<ul class="mb-0 ps-3">${insights.map(i => `<li class="mb-3 text-dark">${i}</li>`).join('')}</ul>`;
+        insightBox.innerHTML = `<ul class="mb-0 ps-3" style="animation: slideInLeft 0.5s ease-out forwards;">
+            ${insights.map(i => `<li class="mb-3 text-dark" style="line-height: 1.55;">${i}</li>`).join('')}
+        </ul>`;
         insightBox.classList.remove('d-none');
-    }, 1200); 
+    }, 1500); 
 });

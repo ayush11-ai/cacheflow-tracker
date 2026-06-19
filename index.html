@@ -11,249 +11,298 @@
 </head>
 <body class="bg-app">
 
-<div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3 no-print" style="z-index: 1055;"></div>
-
-<div id="onboardingModal" class="modal-overlay d-flex align-items-center justify-content-center d-none no-print">
-    <div class="card shadow-lg p-4 border-0 text-center position-relative" style="max-width: 420px; width: 100%; border-radius: 16px;">
-        <button type="button" class="btn-close position-absolute top-0 end-0 m-3 d-none" id="closeModalBtn" aria-label="Close"></button>
-        <h4 class="fw-bold mb-2 text-navy">👋 Welcome to CacheFlow</h4>
-        <p class="text-muted small mb-4">Set up your profile to activate the financial analysis ledger.</p>
+<div id="splashScreen" class="splash-overlay d-flex flex-column align-items-center justify-content-center no-print">
+    <div class="text-center splash-content">
+        <img src="goal.jpg" alt="CacheFlow" class="splash-logo mb-3 shadow">
+        <h2 class="fw-bold text-white mb-1">⚡ CacheFlow</h2>
         
-        <form id="setupForm">
-            <div class="mb-3 text-start">
-                <label class="form-label small fw-bold text-muted">What should we call you?</label>
-                <input type="text" id="initName" class="form-control border-0 py-2 shadow-sm" placeholder="e.g. Ayush" required>
-            </div>
-            <div class="mb-3 text-start">
-                <label class="form-label small fw-bold text-muted">Monthly Allowance / Salary (₹)</label>
-                <input type="number" id="initSalary" class="form-control border-0 py-2 shadow-sm" placeholder="e.g. 15000" required>
-            </div>
-            <div class="mb-4 text-start">
-                <label class="form-label small fw-bold text-muted">Financial Savings Target (₹)</label>
-                <input type="number" id="initGoal" class="form-control border-0 py-2 shadow-sm" placeholder="e.g. 5000" required>
-            </div>
-            
-            <div class="d-flex gap-2">
-                <button type="button" id="cancelSetupBtn" class="btn btn-outline-secondary w-50 py-2 fw-bold shadow-sm d-none">Cancel</button>
-                <button type="submit" id="saveSetupBtn" class="btn btn-navy w-100 py-2 fw-bold shadow-sm">Initialize Dashboard</button>
-            </div>
-        </form>
+        <div class="mt-3 overflow-hidden d-flex justify-content-center align-items-center" style="height: 40px;">
+            <p id="featureText" class="fw-bold mb-0 feature-fade" style="color: #38bdf8; font-size: 1.4rem; letter-spacing: 1px; text-shadow: 0 2px 10px rgba(56, 189, 248, 0.5);">
+                📊 Track Wisely.
+            </p>
+        </div>
+    </div>
+    <div class="position-absolute bottom-0 mb-4">
+        <span class="text-muted fw-bold" style="font-size: 0.65rem; letter-spacing: 2px; opacity: 0.5;">CRAFTED BY AYUSH</span>
     </div>
 </div>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-navy mb-4 shadow-sm py-3 no-print">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="#">⚡ CacheFlow</a>
+<div id="firstTimeTourOverlay" class="splash-overlay d-flex align-items-center justify-content-center d-none no-print" style="z-index: 2500;">
+    <div class="card shadow-lg p-5 border-0 text-center modal-pop bg-white" style="max-width: 450px; width: 90%; border-radius: 20px;">
         
-        <div class="d-flex align-items-center gap-3">
-            <span class="badge bg-danger rounded-pill px-3 py-2 shadow-sm fs-6" id="streakBadge" title="Consecutive days without spending on wants">🔥 0 Day Streak</span>
+        <div class="d-flex justify-content-center gap-2 mb-4" id="tourDots">
+            <div class="tour-dot active-dot" id="dot0"></div>
+            <div class="tour-dot" id="dot1"></div>
+            <div class="tour-dot" id="dot2"></div>
+        </div>
+
+        <div class="tour-slide d-block" id="tour0">
+            <div class="mb-3" style="font-size: 3.5rem;">📊</div>
+            <h3 class="fw-bold text-navy mb-2">Track Quickly ⚡</h3>
+            <p class="text-muted mb-4 px-3" style="font-size: 0.95rem;">Log your daily spending easily 💸. Watch your custom chart update in real-time to see exactly where your money goes.</p>
+        </div>
+
+        <div class="tour-slide d-none" id="tour1">
+            <div class="mb-3" style="font-size: 3.5rem;">💡</div>
+            <h3 class="fw-bold text-navy mb-2">Get Smart Tips 🧠</h3>
+            <p class="text-muted mb-4 px-3" style="font-size: 0.95rem;">Click <strong>"Run Deep Diagnostic"</strong> to get a clever breakdown of your habits. We'll give you personalized tips to help you save more money 💰.</p>
+        </div>
+
+        <div class="tour-slide d-none" id="tour2">
+            <div class="mb-3" style="font-size: 3.5rem;">📄</div>
+            <h3 class="fw-bold text-navy mb-2">Download Freely 📥</h3>
+            <p class="text-muted mb-4 px-3" style="font-size: 0.95rem;">Need a record? Click <strong>"Export PDF"</strong> at the top to instantly download a clean, professional summary of your expenses 📑.</p>
+        </div>
+
+        <div class="mt-2">
+            <button type="button" class="btn btn-navy w-100 py-3 fw-bold shadow-sm btn-scale rounded-pill" id="nextTourBtn" style="font-size: 1.1rem;">Next</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="appContainer" class="fade-in-content" style="opacity: 0; display: none;">
+
+    <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3 no-print" style="z-index: 1055;"></div>
+
+    <div id="onboardingModal" class="modal-overlay d-flex align-items-center justify-content-center d-none no-print">
+        <div class="card shadow-lg p-4 border-0 text-center position-relative modal-pop" style="max-width: 420px; width: 100%; border-radius: 16px;">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3 d-none" id="closeModalBtn" aria-label="Close"></button>
+            <h4 class="fw-bold mb-2 text-navy">👋 Let's Get Started</h4>
+            <p class="text-muted small mb-4">Set up your profile to activate the financial ledger.</p>
             
-            <div class="dropdown">
-                <button class="btn btn-light btn-sm fw-bold shadow-sm rounded-pill px-3 dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    ⚙️ <span id="welcomeMessage">Settings</span>
+            <form id="setupForm">
+                <div class="mb-3 text-start">
+                    <label class="form-label small fw-bold text-muted">What should we call you?</label>
+                    <input type="text" id="initName" class="form-control border-0 py-2 shadow-sm input-transition" placeholder="e.g. Ayush" required>
+                </div>
+                <div class="mb-3 text-start">
+                    <label class="form-label small fw-bold text-muted">Monthly Allowance / Salary (₹)</label>
+                    <input type="number" id="initSalary" class="form-control border-0 py-2 shadow-sm input-transition" placeholder="e.g. 50000" required>
+                </div>
+                <div class="mb-4 text-start">
+                    <label class="form-label small fw-bold text-muted">Financial Savings Target (₹)</label>
+                    <input type="number" id="initGoal" class="form-control border-0 py-2 shadow-sm input-transition" placeholder="e.g. 10000" required>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="button" id="cancelSetupBtn" class="btn btn-outline-secondary w-50 py-2 fw-bold shadow-sm d-none btn-scale">Cancel</button>
+                    <button type="submit" id="saveSetupBtn" class="btn btn-navy w-100 py-2 fw-bold shadow-sm btn-scale">Initialize Dashboard</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="exportModal" class="modal-overlay d-flex align-items-center justify-content-center d-none no-print">
+        <div class="card shadow-lg p-4 border-0 text-center position-relative modal-pop" style="max-width: 400px; width: 100%; border-radius: 16px;">
+            <button type="button" class="btn-close position-absolute top-0 end-0 m-3" id="closeExportModalBtn" aria-label="Close"></button>
+            <h4 class="fw-bold mb-2 text-navy">📄 Export Statement</h4>
+            <p class="text-muted small mb-4">Select the time range for your financial PDF report.</p>
+            
+            <div class="mb-3 text-start">
+                <label class="form-label small fw-bold text-muted">Time Range</label>
+                <select id="exportRange" class="form-select border-0 py-2 shadow-sm input-transition">
+                    <option value="month">Current Month</option>
+                    <option value="date">Specific Date</option>
+                    <option value="all">Full History (All Time)</option>
+                </select>
+            </div>
+            
+            <div class="mb-4 text-start d-none" id="exportDateContainer">
+                <label class="form-label small fw-bold text-muted">Select Date</label>
+                <input type="date" id="exportSpecificDate" class="form-control border-0 py-2 shadow-sm input-transition">
+            </div>
+            
+            <button type="button" id="confirmExportBtn" class="btn btn-navy w-100 py-2 fw-bold shadow-sm btn-scale">Generate PDF</button>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-navy mb-4 shadow-sm py-3 no-print navbar-slide">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">⚡ CacheFlow</a>
+            
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-danger rounded-pill px-3 py-2 shadow-sm fs-6 streak-pulse" id="streakBadge" title="Consecutive days without spending on wants">🔥 0 Day Streak</span>
+                
+                <button id="exportPdfBtnMain" class="btn btn-outline-light btn-sm fw-bold shadow-sm rounded-pill px-3 btn-scale d-none d-sm-block">
+                    📄 Export PDF
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
-                    <li><a class="dropdown-item" href="#" id="editProfileBtn">Edit Profile & Goals</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" id="exportPdfBtn">📄 Export Financial Statement (PDF)</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</nav>
 
-<div class="print-header d-none mb-4">
-    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
-        <div>
-            <h2 class="fw-bold text-navy mb-0">⚡ CacheFlow Accounts Ledger</h2>
-            <p class="text-muted small mb-0" id="printGenerationMeta">Generated Statement Account History</p>
-        </div>
-        <div class="text-end">
-            <h5 class="fw-bold text-secondary mb-0" id="printUserHolder">User: --</h5>
-            <small class="text-muted" id="printTimestamp">Timestamped Record</small>
-        </div>
-    </div>
-</div>
-
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0 h-100 rounded-4 stat-card">
-                <div class="card-body d-flex flex-column justify-content-center">
-                    <h6 class="text-muted fw-bold mb-1">💼 Total Spending</h6>
-                    <h3 class="fw-bold text-danger mb-0" id="totalSpending">₹0</h3>
+                <div class="dropdown">
+                    <button class="btn btn-light btn-sm fw-bold shadow-sm rounded-pill px-3 dropdown-toggle btn-scale" type="button" data-bs-toggle="dropdown">
+                        ⚙️ <span id="welcomeMessage">Settings</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 dropdown-fade">
+                        <li><a class="dropdown-item" href="#" id="editProfileBtn">Edit Profile & Goals</a></li>
+                        <li class="d-block d-sm-none"><hr class="dropdown-divider"></li>
+                        <li class="d-block d-sm-none"><a class="dropdown-item" href="#" id="exportPdfBtnMobile">📄 Export PDF</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <div class="col-md-3 mb-3">
-            <div class="card shadow-sm border-0 h-100 rounded-4 stat-card">
-                <div class="card-body d-flex flex-column justify-content-center">
-                    <h6 class="text-muted fw-bold mb-1">🎯 Remaining Balance</h6>
-                    <h3 class="fw-bold text-success mb-0" id="remainingBalance">₹0</h3>
-                </div>
+    </nav>
+
+    <div class="print-header d-none mb-4">
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+            <div>
+                <h3 class="fw-bold text-navy mb-0">⚡ CacheFlow Expense Statement</h3>
+                <p class="text-muted small mb-0" id="printGenerationMeta">Account Expense History Summary</p>
+            </div>
+            <div class="text-end">
+                <h6 class="fw-bold text-secondary mb-0" id="printUserHolder">User: --</h6>
+                <small class="text-muted small" id="printTimestamp" style="font-size: 0.8rem;">Timestamped Record</small>
             </div>
         </div>
-        <div class="col-md-6 mb-3">
-            <div class="card shadow-sm border-0 h-100 bg-primary-gradient text-white rounded-4 stat-card">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div class="w-100">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <h6 id="goalTitle" class="mb-0 fw-bold">📈 Target: Loading...</h6>
-                        </div>
-                        <div class="progress mt-3 overflow-visible" style="height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 10px;">
-                            <div id="goalProgressBar" class="progress-bar bg-success transition-width" style="width: 0%; border-radius: 10px;"></div>
-                        </div>
-                        <h5 class="fw-bold mt-2 mb-0" id="savedAmountLabel">₹0 Saved</h5>
+    </div>
+
+    <div class="container">
+        <div class="row mb-4 no-print stagger-1">
+            <div class="col-md-3 mb-3">
+                <div class="card shadow-sm border-0 h-100 rounded-4 stat-card card-lift">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h6 class="text-muted fw-bold mb-1">💼 Total Spending</h6>
+                        <h3 class="fw-bold text-danger mb-0" id="totalSpending">₹0</h3>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <div class="row mb-4">
-        <div class="col-md-4 no-print">
-            <div class="card shadow-sm border-0 mb-4 rounded-4">
-                <div class="card-header bg-white fw-bold py-3 text-navy border-0">📝 Log New Expense</div>
-                <div class="card-body d-flex flex-column justify-content-center">
-                    <form id="expenseForm">
-                        <input type="text" id="expDesc" class="form-control border-0 mb-3 py-2 shadow-sm input-transition" placeholder="Description (e.g. Netflix)" required>
-                        <input type="number" id="expAmount" class="form-control border-0 mb-3 py-2 shadow-sm input-transition" placeholder="Amount (₹)" required>
-                        <input type="date" id="expDate" class="form-control border-0 mb-3 py-2 shadow-sm text-muted input-transition" required>
-                        <select id="expCat" class="form-select border-0 mb-3 py-2 text-muted shadow-sm input-transition" required>
-                            <option value="" disabled selected>Select Category</option>
-                            <option value="Food">🍔 Food</option>
-                            <option value="Travel">🚕 Travel</option>
-                            <option value="Shopping">🛍️ Shopping</option>
-                            <option value="Entertainment">🎬 Entertainment</option>
-                            <option value="Health care">🏥 Health care</option>
-                            <option value="EMI">💳 EMI</option>
-                            <option value="Rent">🏠 Rent</option>
-                            <option value="Investment">📈 Investment</option>
-                            <option value="Emergency">🚨 Emergency</option>
-                            <option value="Other">✨ Other</option>
-                        </select>
-                        <div class="form-check mb-4">
-                            <input class="form-check-input shadow-sm" type="checkbox" id="expRecurring">
-                            <label class="form-check-label text-muted small fw-bold" for="expRecurring">
-                                🔄 Save as recurring monthly subscription
-                            </label>
-                        </div>
-                        <button type="submit" class="btn btn-navy w-100 py-2 fw-bold shadow-sm">Add Expense</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="card shadow-sm border-0 mb-4 rounded-4">
-                <div class="card-header bg-white fw-bold py-3 text-navy border-0 d-flex justify-content-between align-items-center">
-                    <span>🔄 Active Subscriptions</span>
-                    <span class="badge bg-navy rounded-pill" id="subTotalBadge">₹0</span>
-                </div>
-                <div class="card-body p-0">
-                    <ul class="list-group list-group-flush" id="subscriptionList">
-                        </ul>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-8 print-full-width">
-            <div class="row h-100">
-                <div class="col-md-6 mb-4 print-half-width">
-                    <div class="card shadow-sm border-0 h-100 rounded-4">
-                        <div class="card-header bg-white fw-bold py-3 text-navy border-0">📊 Spending Breakdown</div>
-                        <div class="card-body d-flex justify-content-center align-items-center" style="position: relative; height: 250px;">
-                            <canvas id="expenseChart"></canvas>
-                        </div>
+            <div class="col-md-3 mb-3">
+                <div class="card shadow-sm border-0 h-100 rounded-4 stat-card card-lift">
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h6 class="text-muted fw-bold mb-1">🎯 Remaining Balance</h6>
+                        <h3 class="fw-bold text-success mb-0" id="remainingBalance">₹0</h3>
                     </div>
                 </div>
-                <div class="col-md-6 mb-4 print-half-width">
-                    <div class="card shadow-sm border-0 h-100 border-start border-navy border-4 rounded-4 position-relative overflow-hidden">
-                        <div class="card-header bg-white fw-bold py-3 text-navy border-0">💡 Engine Financial Insights</div>
-                        <div class="card-body d-flex flex-column">
-                            <button id="aiBtn" class="btn btn-outline-navy w-100 mb-3 fw-bold py-2 no-print">Generate Analytics</button>
-                            <div id="aiSkeleton" class="d-none w-100 h-100 no-print">
-                                <div class="skeleton-box mb-2" style="height: 20px; width: 60%; border-radius: 4px;"></div>
-                                <div class="skeleton-box mb-2" style="height: 15px; width: 100%; border-radius: 4px;"></div>
-                                <div class="skeleton-box mb-2" style="height: 15px; width: 90%; border-radius: 4px;"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm border-0 h-100 bg-primary-gradient text-white rounded-4 stat-card card-lift">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <h6 id="goalTitle" class="mb-0 fw-bold">📈 Target: Loading...</h6>
                             </div>
-                            <div id="aiInsights" class="text-muted small p-3 bg-light rounded-3 flex-grow-1 overflow-auto">
-                                <p class="small text-center mb-0 text-muted">Click generate to calculate system diagnostics.</p>
+                            <div class="progress mt-3 overflow-visible" style="height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 10px;">
+                                <div id="goalProgressBar" class="progress-bar bg-success transition-width" style="width: 0%; border-radius: 10px; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+                            </div>
+                            <h5 class="fw-bold mt-2 mb-0" id="savedAmountLabel">₹0 Saved</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mb-4 stagger-2">
+            <div class="col-md-4 no-print">
+                <div class="card shadow-sm border-0 mb-4 rounded-4 card-lift">
+                    <div class="card-header bg-white fw-bold py-3 text-navy border-0">📝 Log New Expense</div>
+                    <div class="card-body">
+                        <form id="expenseForm">
+                            <input type="text" id="expDesc" class="form-control border-0 mb-3 py-2 shadow-sm input-transition" placeholder="Description (e.g. Netflix)" required>
+                            <input type="number" id="expAmount" class="form-control border-0 mb-3 py-2 shadow-sm input-transition" placeholder="Amount (₹)" required>
+                            <input type="date" id="expDate" class="form-control border-0 mb-3 py-2 shadow-sm text-muted input-transition" required>
+                            <select id="expCat" class="form-select border-0 mb-4 text-muted shadow-sm input-transition" required>
+                                <option value="" disabled selected>Select Category</option>
+                                <option value="Food">🍔 Food</option>
+                                <option value="Travel">🚕 Travel</option>
+                                <option value="Shopping">🛍️ Shopping</option>
+                                <option value="Entertainment">🎬 Entertainment</option>
+                                <option value="Health care">🏥 Health care</option>
+                                <option value="EMI">💳 EMI</option>
+                                <option value="Rent">🏠 Rent</option>
+                                <option value="Investment">📈 Investment</option>
+                                <option value="Emergency">🚨 Emergency</option>
+                                <option value="Other">✨ Other</option>
+                            </select>
+                            <button type="submit" class="btn btn-navy w-100 py-2 fw-bold shadow-sm btn-scale">Add Expense</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8 print-full-width">
+                <div class="row h-100">
+                    <div class="col-md-6 mb-4 print-full-width text-center">
+                        <div class="card shadow-sm border-0 h-100 rounded-4 card-lift d-flex flex-column">
+                            <div class="card-header bg-white fw-bold py-3 text-navy border-0 text-center text-sm-start">📊 Spending Breakdown</div>
+                            <div class="card-body d-flex flex-column justify-content-between align-items-center flex-grow-1">
+                                <div class="mx-auto my-auto" style="position: relative; height: 180px; width: 100%; max-width: 180px;">
+                                    <canvas id="expenseChart"></canvas>
+                                </div>
+                                <div class="w-100 mt-3 pt-3 border-top no-print legend-fade" style="font-size: 0.78rem;">
+                                    <div class="d-flex justify-content-center flex-wrap gap-3 text-muted fw-medium">
+                                        <span class="d-flex align-items-center gap-1"><span style="width:8px;height:8px;border-radius:50%;background:#fb7185;display:inline-block;"></span>Food</span>
+                                        <span class="d-flex align-items-center gap-1"><span style="width:8px;height:8px;border-radius:50%;background:#38bdf8;display:inline-block;"></span>Travel</span>
+                                        <span class="d-flex align-items-center gap-1"><span style="width:8px;height:8px;border-radius:50%;background:#facc15;display:inline-block;"></span>Shop</span>
+                                        <span class="d-flex align-items-center gap-1"><span style="width:8px;height:8px;border-radius:50%;background:#34d399;display:inline-block;"></span>Ent.</span>
+                                        <span class="d-flex align-items-center gap-1"><span style="width:8px;height:8px;border-radius:50%;background:#f472b6;display:inline-block;"></span>Health</span>
+                                        <span class="d-flex align-items-center gap-1"><span style="width:8px;height:8px;border-radius:50%;background:#818cf8;display:inline-block;"></span>EMI</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="calendar-wrapper p-3 mb-4 text-center text-sm-start no-print" style="
-        background: rgba(255, 255, 255, 0.45);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        border-radius: 16px;
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        position: relative;
-        overflow: hidden;
-    " onmouseenter="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 12px 40px 0 rgba(31, 38, 135, 0.15)';" onmouseleave="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 32px 0 rgba(31, 38, 135, 0.08)';">
-        
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);"></div>
-
-        <div class="row align-items-center g-3">
-            <div class="col-md-6">
-                <label for="calendarFilter" class="form-label fw-bold text-dark mb-1 d-flex align-items-center gap-2" style="font-size: 0.95rem;">
-                    📅 <span>Temporal Flux Filter</span>
-                </label>
-                <p class="text-muted small mb-0">Isolate records across specific timeline intervals.</p>
-            </div>
-            <div class="col-md-6 text-sm-end">
-                <div class="d-inline-flex flex-column align-items-sm-end gap-2 w-100">
-                    <input type="date" id="calendarFilter" class="form-control" style="
-                        border-radius: 10px;
-                        border: 2px solid #e0e6ed;
-                        padding: 10px 14px;
-                        font-weight: 600;
-                        background: #ffffff;
-                        color: #2d3748;
-                        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
-                        transition: all 0.3s ease;
-                        outline: none;
-                    " onfocus="this.style.borderColor='#4facfe'; this.style.boxShadow='0 0 0 4px rgba(79, 172, 254, 0.25)';" onblur="this.style.borderColor='#e0e6ed'; this.style.boxShadow='none';">
                     
-                    <span id="temporalBadge" class="badge bg-secondary p-2" style="
-                        font-size: 0.75rem; 
-                        letter-spacing: 0.5px; 
-                        text-transform: uppercase;
-                        border-radius: 6px;
-                        font-family: monospace;
-                        transition: all 0.3s ease;
-                    ">👁️ Monitoring All Timelines</span>
+                    <div class="col-md-6 mb-4 no-print">
+                        <div class="card shadow-sm border-0 h-100 border-start border-navy border-4 rounded-4 position-relative overflow-hidden card-lift">
+                            <div class="card-header bg-white fw-bold py-3 text-navy border-0">💡 Predictive Analysis</div>
+                            <div class="card-body d-flex flex-column">
+                                <button id="aiBtn" class="btn btn-outline-navy w-100 mb-3 fw-bold py-2 btn-scale ai-glow">Run Deep Diagnostic</button>
+                                <div id="aiSkeleton" class="d-none w-100 h-100">
+                                    <div class="skeleton-box mb-2" style="height: 20px; width: 60%; border-radius: 4px;"></div>
+                                    <div class="skeleton-box mb-2" style="height: 15px; width: 100%; border-radius: 4px;"></div>
+                                    <div class="skeleton-box mb-2" style="height: 15px; width: 90%; border-radius: 4px;"></div>
+                                </div>
+                                <div id="aiInsights" class="text-muted small p-3 bg-light rounded-3 flex-grow-1 overflow-auto smooth-scroll">
+                                    <p class="small text-center mb-0 text-muted mt-4">Initiate scan to audit behavioral spending leaks.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row break-before">
-        <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-4 mb-5">
-                <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
-                    <span class="fw-bold text-navy">🧾 Financial Record Audit</span>
-                    <button id="clearFilterBtn" class="btn btn-sm btn-outline-secondary no-print">Reset Filter</button>
+        <div class="row mb-4 stagger-3">
+            <div class="col-12 no-print">
+                <div class="card shadow-sm border-0 p-3 rounded-4 card-lift">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-6">
+                            <label for="calendarFilter" class="form-label fw-bold text-dark mb-1 d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                                📅 <span>Filter by Date</span>
+                            </label>
+                            <p class="text-muted small mb-0">Select a day to review specific transaction historical entries.</p>
+                        </div>
+                        <div class="col-md-6 text-sm-end">
+                            <div class="d-flex flex-sm-row flex-column align-items-sm-center justify-content-sm-end gap-2">
+                                <input type="date" id="calendarFilter" class="form-control border-0 shadow-sm text-muted py-2 px-3 input-transition" style="max-width: 240px; border-radius: 10px;">
+                                <button id="clearFilterBtn" class="btn btn-outline-secondary border-0 shadow-sm py-2 px-3 btn-scale" style="border-radius: 10px;">Reset Table</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body p-0 table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="txTable">
-                        <thead class="bg-light text-muted small border-bottom">
-                            <tr>
-                                <th class="ps-4">Date</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th>Amount</th>
-                                <th class="pe-4 text-end no-print">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            </tbody>
-                    </table>
+            </div>
+        </div>
+
+        <div class="row break-before" style="animation: slideUpFade 0.6s ease-out 0.4s forwards; opacity: 0;">
+            <div class="col-12">
+                <div class="card shadow-sm border-0 rounded-4 mb-5 card-lift">
+                    <div class="card-header bg-white border-0 py-3">
+                        <span class="fw-bold text-navy">🧾 History List Log</span>
+                    </div>
+                    <div class="card-body p-0 table-responsive">
+                        <table class="table table-hover align-middle mb-0" id="txTable">
+                            <thead class="bg-light text-muted small border-bottom">
+                                <tr>
+                                    <th class="ps-4">Date</th>
+                                    <th>Description</th>
+                                    <th>Category</th>
+                                    <th>Amount</th>
+                                    <th class="pe-4 text-end no-print">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
