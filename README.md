@@ -14,3 +14,30 @@ CacheFlow is a lightweight, high-performance in-memory caching system designed f
 ---
 
 ## 🛠️ How It Works
+
+[ Client Request ] ──► [ Express Router ]
+                             │
+                    ┌────────┴────────┐
+                    ▼                 ▼
+          [ Cache Flow Hit ]   [ Cache Flow Miss ]
+                    │                 │
+           (Returns Fast Data)        ├──► [ Database / API ]
+                                      │          │
+                                      └◄─────────┘
+                                (Saves to Cache & Returns)
+
+---
+
+## 📦 Installation
+
+Clone the repository and install the development environment:
+
+```bash
+# Clone the repository
+git clone [https://github.com/YOUR_USERNAME/cacheflow.git](https://github.com/YOUR_USERNAME/cacheflow.git)
+
+# Navigate to the directory
+cd cacheflow
+
+# Install dependencies
+npm install
