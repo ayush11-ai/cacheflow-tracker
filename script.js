@@ -11,33 +11,60 @@ localStorage.setItem('expenses', JSON.stringify(expenses));
 
 const formatINR = (num) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(num);
 
+// Micro-interaction: Smooth Count-Up Animation Engine
+function animateCurrency(elementId, newValue) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const currentValue = parseFloat(el.getAttribute('data-val')) || 0;
+    if (currentValue === newValue) return;
+    
+    el.setAttribute('data-val', newValue);
+    const duration = 500; 
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeOut = progress * (2 - progress); 
+        const current = currentValue + (newValue - currentValue) * easeOut;
+
+        el.innerText = formatINR(current);
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            el.innerText = formatINR(newValue);
+        }
+    }
+    requestAnimationFrame(update);
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+
     document.getElementById('expDate').value = new Date().toISOString().split('T')[0];
     document.getElementById('exportSpecificDate').value = new Date().toISOString().split('T')[0];
     
-    // Feature Carousel Text Animation for 2-Second Splash
     const featureText = document.getElementById('featureText');
     setTimeout(() => {
-        featureText.style.opacity = '0'; featureText.style.transform = 'translateY(5px)';
+        featureText.style.opacity = '0'; featureText.style.transform = 'translateY(4px)';
         setTimeout(() => {
             featureText.innerHTML = "Download Freely."; featureText.style.opacity = '1'; featureText.style.transform = 'translateY(0)';
         }, 200); 
     }, 600);
 
     setTimeout(() => {
-        featureText.style.opacity = '0'; featureText.style.transform = 'translateY(5px)';
+        featureText.style.opacity = '0'; featureText.style.transform = 'translateY(4px)';
         setTimeout(() => {
             featureText.innerHTML = "Be Smart."; featureText.style.opacity = '1'; featureText.style.transform = 'translateY(0)';
         }, 200);
     }, 1300);
 
-    // Two Second Auto-Running Controller
     setTimeout(() => {
         const splash = document.getElementById('splashScreen');
         splash.style.transform = "translateY(-100%)";
         splash.style.opacity = "0";
-        setTimeout(() => { splash.style.display = "none"; }, 600);
-        
+        setTimeout(() => { splash.style.display = "none"; }, 500);
         routeUserFlow();
     }, 2000); 
 });
@@ -156,14 +183,21 @@ document.getElementById('expDesc').addEventListener('input', function(e) {
 function showBanner(msg, type="success") {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
-    toast.className = `custom-toast ${type === 'error' ? 'bg-danger border-danger' : ''}`;
-    toast.innerHTML = msg;
+    toast.className = `custom-toast ${type === 'error' ? 'border-danger' : ''}`;
+    
+    let iconHTML = type === 'error' 
+        ? `<i data-lucide="alert-circle" class="text-danger flex-shrink-0" style="width:16px;height:16px;"></i>` 
+        : `<i data-lucide="check-circle-2" class="text-success flex-shrink-0" style="width:16px;height:16px;"></i>`;
+        
+    toast.innerHTML = `<div class="d-flex align-items-center gap-2">${iconHTML} <span>${msg}</span></div>`;
     container.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 400); }, 3000);
+    lucide.createIcons();
+    
+    setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
 // ==========================================
-// 6. CHART.JS CONFIGURATION
+// 6. CHART.JS CONFIGURATION (RICH PALETTE)
 // ==========================================
 const centerTextPlugin = {
     id: 'centerText',
@@ -175,8 +209,9 @@ const centerTextPlugin = {
         let centerY = (chartArea.top + chartArea.bottom) / 2;
         ctx.restore();
         let formattedTotal = formatINR(dataTotal);
-        ctx.font = "bold 1.25em 'Inter', sans-serif";
-        ctx.textBaseline = "middle"; ctx.fillStyle = "#0f172a"; 
+        ctx.font = "600 1.25em 'Inter', sans-serif";
+        ctx.textBaseline = "middle"; 
+        ctx.fillStyle = "#1e293b"; 
         ctx.fillText(formattedTotal, centerX - (ctx.measureText(formattedTotal).width / 2), centerY);
         ctx.save();
     }
@@ -189,17 +224,45 @@ let expenseChart = new Chart(ctx, {
         labels: ['Food', 'Travel', 'Shopping', 'Entertainment', 'Health care', 'EMI', 'Rent', 'Investment', 'Emergency', 'Other'],
         datasets: [{
             data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
-            backgroundColor: ['#fb7185', '#38bdf8', '#facc15', '#34d399', '#f472b6', '#818cf8', '#fb923c', '#a78bfa', '#f43f5e', '#94a3b8'],
-            borderWidth: 0, borderRadius: 8, spacing: 4, hoverOffset: 6   
+            backgroundColor: ['#10b981', '#3b82f6', '#f97316', '#8b5cf6', '#ef4444', '#64748b', '#f59e0b', '#0ea5e9', '#e11d48', '#94a3b8'],
+            borderWidth: 0, borderRadius: 4, spacing: 3, hoverOffset: 4   
         }]
     },
     plugins: [centerTextPlugin],
-    options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { display: false } } }
+    options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        cutout: '75%', 
+        plugins: { 
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: '#0f172a',
+                titleFont: { family: 'Inter', size: 12, weight: '600' },
+                bodyFont: { family: 'Inter', size: 12 },
+                padding: 10,
+                cornerRadius: 6,
+                displayColors: false
+            }
+        },
+        animation: { animateScale: true, animateRotate: true, duration: 600, easing: 'easeOutQuart' }
+    }
 });
 
 // ==========================================
 // 7. TRANSACTIONS MANAGEMENT
 // ==========================================
+function getCategoryBadgeClass(cat) {
+    switch(cat) {
+        case 'Food': return 'badge-category badge-food';
+        case 'Travel': return 'badge-category badge-travel';
+        case 'Shopping': return 'badge-category badge-shopping';
+        case 'Entertainment': return 'badge-category badge-entertainment';
+        case 'Health care': return 'badge-category badge-healthcare';
+        case 'EMI': return 'badge-category badge-emi';
+        default: return 'badge-category badge-generic';
+    }
+}
+
 document.getElementById('expenseForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const desc = document.getElementById('expDesc').value;
@@ -220,8 +283,8 @@ document.getElementById('expenseForm').addEventListener('submit', (e) => {
     document.getElementById('expDesc').value = '';
     document.getElementById('expAmount').value = '';
     document.getElementById('expCat').selectedIndex = 0;
-    
     document.getElementById('calendarFilter').value = '';
+    
     updateDashboard(expenses);
 });
 
@@ -287,7 +350,6 @@ document.getElementById('confirmExportBtn').addEventListener('click', () => {
 
     updateDashboard(filteredToPrint, true);
     exportModal.classList.add('d-none');
-
     window.print(); 
 });
 
@@ -317,7 +379,8 @@ document.getElementById('clearFilterBtn').addEventListener('click', () => {
 // ==========================================
 function calculateStreak() {
     if (expenses.length === 0) {
-        document.getElementById('streakBadge').innerText = "🔥 0 Day Streak";
+        document.getElementById('streakBadge').innerHTML = `<i data-lucide="flame" style="width:14px;height:14px;"></i> <span>0 Day Streak</span>`;
+        lucide.createIcons();
         return;
     }
     const WANTS = ['Food', 'Shopping', 'Entertainment'];
@@ -333,11 +396,12 @@ function calculateStreak() {
         streak++;
         checkDate.setDate(checkDate.getDate() - 1);
     }
-    document.getElementById('streakBadge').innerText = `🔥 ${streak} Day Streak`;
+    document.getElementById('streakBadge').innerHTML = `<i data-lucide="flame" style="width:14px;height:14px;"></i> <span>${streak} Day Streak</span>`;
+    lucide.createIcons();
 }
 
 // ==========================================
-// 11. DASHBOARD RENDERER
+// 11. DASHBOARD RENDERER & LOGIC
 // ==========================================
 function updateDashboard(dataArray = expenses, isFiltered = false) {
     const tbody = document.getElementById('tableBody');
@@ -346,18 +410,21 @@ function updateDashboard(dataArray = expenses, isFiltered = false) {
     let grandTotal = 0;
 
     if (dataArray.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted"><em>No expenses logged for this view.</em></td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5 text-slate-500 small"><i data-lucide="inbox" style="width:24px;height:24px;" class="mb-2 opacity-40 d-block mx-auto"></i><strong class="fw-medium text-slate-700" style="font-size:0.9rem;">No expenses recorded yet.</strong><br><span class="text-slate-400 mt-1 d-block">Start by adding your first transaction.</span></td></tr>`;
     } else {
         dataArray.forEach((exp, index) => {
-            let delay = Math.min(index * 0.05, 0.5); 
+            let delay = Math.min(index * 0.02, 0.2); 
+            let badgeClass = getCategoryBadgeClass(exp.cat);
             tbody.innerHTML += `
                 <tr class="row-enter" style="animation-delay: ${delay}s;">
-                    <td class="text-muted small ps-4">${exp.date}</td>
-                    <td class="fw-medium text-navy">${exp.desc}</td>
-                    <td><span class="badge bg-light text-secondary border">${exp.cat}</span></td>
-                    <td class="text-danger fw-bold">${formatINR(exp.amount)}</td>
+                    <td class="text-slate-500 small ps-4">${exp.date}</td>
+                    <td class="fw-medium text-slate-700">${exp.desc}</td>
+                    <td><span class="${badgeClass}">${exp.cat}</span></td>
+                    <td class="text-slate-700 fw-semibold">${formatINR(exp.amount)}</td>
                     <td class="text-end pe-4 no-print">
-                        <button class="btn btn-sm text-danger border-0 fw-bold delete-tx-btn btn-scale" data-id="${exp.id}">Delete</button>
+                        <button class="btn btn-sm text-slate-400 hover:text-danger border-0 delete-tx-btn transition-base p-1 bg-transparent" data-id="${exp.id}" title="Delete">
+                            <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+                        </button>
                     </td>
                 </tr>
             `;
@@ -372,6 +439,9 @@ function updateDashboard(dataArray = expenses, isFiltered = false) {
 
         let remainingBalance = userSalary - grandTotal;
         let spendPercentage = userSalary > 0 ? (grandTotal / userSalary) * 100 : 0;
+        let savePercentage = savingsGoal > 0 ? (remainingBalance / savingsGoal) * 100 : 0;
+        let pctComplete = Math.max(0, Math.min(savePercentage, 100)).toFixed(0);
+        
         let progressBar = document.getElementById('goalProgressBar');
         
         progressBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
@@ -379,22 +449,40 @@ function updateDashboard(dataArray = expenses, isFiltered = false) {
         else if (spendPercentage >= 75) progressBar.classList.add('bg-warning');
         else progressBar.classList.add('bg-success');
         
-        progressBar.style.width = `${Math.min((remainingBalance / savingsGoal) * 100, 100)}%`;
+        progressBar.style.width = `${pctComplete}%`;
 
-        document.getElementById('totalSpending').innerText = formatINR(grandTotal);
-        document.getElementById('remainingBalance').innerText = formatINR(remainingBalance);
-        document.getElementById('goalTitle').innerText = `📈 Target: ${formatINR(savingsGoal)}`;
+        animateCurrency('totalSpending', grandTotal);
+        animateCurrency('remainingBalance', remainingBalance);
+        
+        document.getElementById('goalTitle').innerHTML = `<i data-lucide="target" style="width:14px;height:14px;"></i> Target: ${formatINR(savingsGoal)}`;
         document.getElementById('savedAmountLabel').innerText = `${remainingBalance > 0 ? formatINR(remainingBalance) : formatINR(0)} Saved`;
+        document.getElementById('goalPercentage').innerText = `${pctComplete}% Complete`;
+        
+        // Smart Goal Estimate Calculation
+        let estContainer = document.getElementById('estimatedCompletion');
+        let daysActive = new Set(expenses.map(e => e.isoDate)).size;
+        
+        if (remainingBalance >= savingsGoal && savingsGoal > 0) {
+            estContainer.innerHTML = `Target Achieved! <i data-lucide="check-circle-2" style="width:12px;height:12px;" class="ms-1"></i>`;
+        } else if (daysActive > 0 && remainingBalance > 0 && remainingBalance < savingsGoal) {
+            let avgSavedPerDay = remainingBalance / daysActive;
+            let daysLeft = Math.ceil((savingsGoal - remainingBalance) / avgSavedPerDay);
+            estContainer.innerText = `Estimated goal completion in ~${daysLeft} days`;
+        } else {
+            estContainer.innerText = `Track more days to unlock estimate.`;
+        }
         
         calculateStreak();
     } else {
         expenseChart.data.datasets[0].data = [totals.Food, totals.Travel, totals.Shopping, totals.Entertainment, totals['Health care'], totals.EMI, totals.Rent, totals.Investment, totals.Emergency, totals.Other];
         expenseChart.update();
     }
+    
+    lucide.createIcons();
 }
 
 // ==========================================
-// 12. ADVANCED HEURISTIC RULES ENGINE 
+// 12. ADVANCED HEURISTIC RULES ENGINE (LIGHT THEME ALERTS)
 // ==========================================
 document.getElementById('aiBtn').addEventListener('click', () => {
     const insightBox = document.getElementById('aiInsights');
@@ -403,11 +491,15 @@ document.getElementById('aiBtn').addEventListener('click', () => {
     
     if (window.umami) umami.track('Diagnostic Run');
 
-    btn.innerHTML = "Compiling Analytics..."; btn.disabled = true;
+    btn.innerHTML = `<i data-lucide="loader-2" class="spin-icon" style="width:15px;height:15px; animation: spin 1s linear infinite;"></i> Compiling Analytics...`; 
+    btn.disabled = true;
+    
     insightBox.classList.add('d-none'); skeleton.classList.remove('d-none'); 
+    lucide.createIcons();
 
     setTimeout(() => {
-        btn.innerHTML = "Run Deep Diagnostic"; btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="cpu" style="width:15px;height:15px;"></i> Run Deep Diagnostic`; 
+        btn.disabled = false;
         skeleton.classList.add('d-none'); 
 
         let grandTotal = 0;
@@ -425,12 +517,13 @@ document.getElementById('aiBtn').addEventListener('click', () => {
         const totalDays = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
         
         let projectedSpend = (grandTotal / currentDay) * totalDays;
+        
         if (projectedSpend > userSalary && currentDay > 3) {
             let deficit = projectedSpend - userSalary;
-            insights.push(`<strong>Overspending Warning:</strong> You are spending about ${formatINR(grandTotal/currentDay)} a day. If you keep this up, you'll be short by <strong>${formatINR(deficit)}</strong> at the end of the month. Try to freeze spending for a couple of days.`);
+            insights.push(`<div class="ai-alert-danger rounded-3 d-flex gap-3 align-items-start p-3 w-100 shadow-sm"><i data-lucide="alert-triangle" class="flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i> <div><strong class="fw-semibold">Overspending Warning:</strong> You are spending about ${formatINR(grandTotal/currentDay)} a day. If you keep this up, you'll be short by <strong>${formatINR(deficit)}</strong> at the end of the month. Try to freeze spending for a couple of days.</div></div>`);
         } else if (projectedSpend < userSalary && grandTotal > 0 && currentDay > 5) {
             let surplus = userSalary - projectedSpend;
-            insights.push(`<strong>On Track:</strong> Great job! You are spending wisely. If you keep this up, you'll end the month with an extra <strong>${formatINR(surplus)}</strong> saved.`);
+            insights.push(`<div class="ai-alert-success rounded-3 d-flex gap-3 align-items-start p-3 w-100 shadow-sm"><i data-lucide="trending-up" class="flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i> <div><strong class="fw-semibold">On Track:</strong> Great job. You are spending wisely. If you keep this up, you'll end the month with an extra <strong>${formatINR(surplus)}</strong> saved.</div></div>`);
         }
 
         let wants = totals['Food'] + totals['Shopping'] + totals['Entertainment'] + totals['Other'];
@@ -438,35 +531,32 @@ document.getElementById('aiBtn').addEventListener('click', () => {
         
         if (wantsPercent > 30) {
             let biggestDrain = totals['Food'] > totals['Shopping'] ? 'Food' : 'Shopping';
-            insights.push(`<strong>Want vs. Need:</strong> You are spending a bit too much on fun and lifestyle stuff (mostly on <strong>${biggestDrain}</strong>). Try to dial this back to save more of your hard-earned money.`);
+            insights.push(`<div class="ai-alert-warning rounded-3 d-flex gap-3 align-items-start p-3 w-100 shadow-sm"><i data-lucide="scale" class="flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i> <div><strong class="fw-semibold">Want vs. Need:</strong> You are spending a bit too much on fun and lifestyle stuff (mostly on <strong>${biggestDrain}</strong>). Try to dial this back to save more of your hard-earned money.</div></div>`);
         }
 
         let foodCount = expenses.filter(e => e.cat === 'Food').length;
         if (foodCount >= 4) {
             let avgFood = totals['Food'] / foodCount;
-            insights.push(`<strong>Food Habit:</strong> You've ordered food ${foodCount} times, spending about ${formatINR(avgFood)} each time. Skipping just 2 of these orders next time will easily save you <strong>${formatINR(avgFood * 2)}</strong>.`);
-        }
-
-        let largeTx = expenses.filter(e => e.amount > (userSalary * 0.15));
-        if (largeTx.length > 0) {
-            insights.push(`<strong>Big Expense:</strong> Your payment for '${largeTx[0].desc}' took up a massive chunk of your budget all at once. Be extra careful with big purchases early in the month.`);
-        }
-
-        let daysWithSpends = new Set(expenses.map(e => e.isoDate)).size;
-        let zeroDays = currentDay - daysWithSpends;
-        if (zeroDays >= 4 && grandTotal > 0) {
-            insights.push(`<strong>Great Habit:</strong> You didn't spend any money at all for ${zeroDays} days this month. Building 'Zero-Spend Days' is a super fast way to hit your savings goal.`);
+            insights.push(`<div class="ai-alert-neutral rounded-3 d-flex gap-3 align-items-start p-3 w-100 shadow-sm"><i data-lucide="coffee" class="flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i> <div><strong class="fw-semibold">Food Habit:</strong> You've ordered food ${foodCount} times, spending about ${formatINR(avgFood)} each time. Skipping just 2 of these orders next time will easily save you <strong>${formatINR(avgFood * 2)}</strong>.</div></div>`);
         }
 
         if (insights.length === 0 && grandTotal > 0) {
-            insights.push(`<strong>Looking Good:</strong> Your spending is perfectly balanced right now. Keep tracking your expenses to stay on target.`);
+            insights.push(`<div class="ai-alert-success rounded-3 d-flex gap-3 align-items-start p-3 w-100 shadow-sm"><i data-lucide="check-circle" class="flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i> <div><strong class="fw-semibold">Looking Good:</strong> Your spending is perfectly balanced right now. Keep tracking your expenses to stay on target.</div></div>`);
         } else if (grandTotal === 0) {
-            insights.push(`Log some expenses so the app can start giving you smart tips on how to save money.`);
+            insights.push(`<div class="ai-alert-info rounded-3 d-flex gap-3 align-items-start p-3 w-100 shadow-sm"><i data-lucide="info" class="flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i> <div>Log some expenses so the app can start giving you smart tips on how to save money.</div></div>`);
         }
 
-        insightBox.innerHTML = `<ul class="mb-0 ps-3" style="animation: slideInLeft 0.5s ease-out forwards;">
-            ${insights.map(i => `<li class="mb-3 text-dark" style="line-height: 1.55;">${i}</li>`).join('')}
-        </ul>`;
+        insightBox.innerHTML = `<div class="d-flex flex-column gap-3" style="animation: fadeIn 0.2s ease-in-out forwards;">
+            ${insights.join('')}
+        </div>`;
+        
         insightBox.classList.remove('d-none');
-    }, 1500); 
+        lucide.createIcons();
+    }, 1000); 
 });
+
+const styleSheet = document.createElement("style");
+styleSheet.innerText = `
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+`;
+document.head.appendChild(styleSheet);
