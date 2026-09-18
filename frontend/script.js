@@ -1,4 +1,4 @@
-const API_BASE = 'https://cacheflowtracker.onrender.com/api';
+const API_BASE = 'https://cacheflowtracker.onrender.com';
 
 let expenses = [];
 let currentUser = null;
