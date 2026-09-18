@@ -242,7 +242,7 @@ async function initDashboardView() {
 
 async function fetchExpenses() {
     try {
-        expenses = await apiRequest('/expenses');
+        expenses = await apiRequest('/api/expenses');
         updateDashboard(expenses);
     } catch (err) {
         showBanner('Error loading transactions', 'error');
