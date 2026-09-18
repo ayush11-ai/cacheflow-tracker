@@ -380,7 +380,7 @@ document.getElementById('expenseForm').addEventListener('submit', async (e) => {
     addBtn.disabled = true;
 
     try {
-        const newExpense = await apiRequest('/expenses', 'POST', {
+        const newExpense = await apiRequest('/api/expenses', 'POST', {
             desc,
             amount,
             cat,
@@ -413,7 +413,7 @@ document.getElementById('tableBody').addEventListener('click', async (e) => {
     delBtn.disabled = true;
 
     try {
-        await apiRequest(`/expenses/${id}`, 'DELETE');
+        await apiRequest(`/api/expenses/${id}`, 'DELETE');
         expenses = expenses.filter(exp => exp._id !== id);
 
         const selectedDate = document.getElementById('calendarFilter').value;
