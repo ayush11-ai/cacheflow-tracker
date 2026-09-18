@@ -189,7 +189,7 @@ document.getElementById('authForm').addEventListener('submit', async (e) => {
     authSubmitBtn.innerText = "Processing...";
 
     try {
-        let endpoint = isLoginMode ? '/auth/login' : '/auth/register';
+        let endpoint = isLoginMode ? '/api/auth/login' : '/api/auth/register';
         let payload = { email, password };
 
         if (!isLoginMode) {
